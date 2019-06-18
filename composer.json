@@ -1,0 +1,52 @@
+{
+  "name": "lee2son/swoole-websocket-laravel",
+  "description": "使用swoole替代php-fpm作为laravel的HTTP层，同时提供websocket支持",
+  "keywords": [
+    "swoole",
+    "websocekt",
+    "laravel",
+    "lumen"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Leeson",
+      "email": "sss60@qq.com"
+    }
+  ],
+  "require": {
+    "php": "^7.1.8"
+  },
+  "require-dev": {
+    "laravel/lumen-framework": "~5.4",
+    "swoole/ide-helper": "@dev"
+  },
+  "autoload": {
+    "files": [
+      "src/helpers.php"
+    ],
+    "psr-4": {
+      "SwooleServer": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "SwooleServer\\LaravelServiceProvider"
+      ],
+      "aliases": {
+
+      }
+    }
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "@php copy_versioned_files.php"
+    ]
+  }
+}
