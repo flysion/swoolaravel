@@ -4,7 +4,7 @@ namespace Lee2son\Laravoole;
 use Illuminate\Support\ServiceProvider;
 use Lee2son\Laravoole\Commands\Service;
 
-class LaravelServiceProvider extends ServiceProvider
+class LaravooleServiceProvider extends ServiceProvider
 {
     public function boot()
     {
