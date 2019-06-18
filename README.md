@@ -1,1 +1,2 @@
-# laravel_in_swoole
+# swoole-websocket-laravel
+使用swoole替代php-fpm作为laravel的HTTP层，同时提供websocket支持
