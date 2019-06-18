@@ -8,7 +8,7 @@ class LaravelServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/swoole_server.php', 'swoole_server');
+        $this->mergeConfigFrom(__DIR__ . '/../config/laravoole.php', 'laravoole');
     }
 
     public function register()
