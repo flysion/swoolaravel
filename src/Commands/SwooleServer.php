@@ -1,6 +1,6 @@
 <?php
+namespace Lee2son\SwooleServer\Commands\Commands;
 
-namespace SwooleServer\Commands\Commands;
 use Illuminate\Console\Command;
 
 class SwooleServer extends Command
