@@ -19,6 +19,11 @@ class HttpServer {
     private $clients;
 
     /**
+     * @var array from laravoole.php
+     */
+    private $config;
+
+    /**
      * @var callable 在客户端连接上时调用
      */
     private $onOpen;
@@ -35,8 +40,10 @@ class HttpServer {
 
     public function __construct()
     {
-        $this->server = new SwooleWebSocketServer(config('laravoole.host'), config('laravoole.port'));
-        $this->server->set(array_merge(config('laravoole.server_options'), [
+        $this->config = config('laravoole');
+
+        $this->server = new SwooleWebSocketServer($this->config['host'], $this->config['port'], $this->config['process_type']);
+        $this->server->set(array_merge($this->config['server_options'], [
             'http_parse_post' => true,
             'http_parse_cookie' => true,
         ]));
@@ -46,8 +53,8 @@ class HttpServer {
         $this->server->on('message', [$this, '_onMessage']);
         $this->server->on('request', [$this, '_onRequest']);
 
-        $this->clients = new SwooleTable(config('laravoole.client_options.max_size'));
-        foreach(config('laravoole.client_options.columns') as $column => $type)
+        $this->clients = new SwooleTable($this->config['client_options']['max_size']);
+        foreach($this->config['client_options']['columns'] as $column => $type)
         {
             $this->clients->column($column, $type);
         }
