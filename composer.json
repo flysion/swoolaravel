@@ -26,7 +26,7 @@
       "src/helpers.php"
     ],
     "psr-4": {
-      "Lee2son\\SwooleServer": "src"
+      "Lee2son\\SwooleServer\\": "src"
     }
   },
   "autoload-dev": {
