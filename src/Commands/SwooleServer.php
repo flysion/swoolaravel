@@ -1,11 +1,11 @@
 <?php
-namespace Lee2son\SwooleServer\Commands\Commands;
+namespace Lee2son\SwooleServer\Commands;
 
 use Illuminate\Console\Command;
 
 class SwooleServer extends Command
 {
-    protected $signature = 'command:SwooleServer {type : start|stop|restart}}';
+    protected $signature = 'SwooleServer {type : start|stop|restart}}';
 
     public function handle()
     {
