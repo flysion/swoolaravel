@@ -61,6 +61,28 @@ class HttpServer {
         $this->clients->create();
     }
 
+    public function on($event, callable $callback)
+    {
+        switch ($event) {
+            case 'open':
+                $this->onOpen = $callback;
+                break;
+            case 'close':
+                $this->onClose = $callback;
+                break;
+            case 'message':
+                $this->onMessage = $callback;
+                break;
+            default:
+                throw new InvalidEventException("\"{$event}\" is invalid");
+        }
+    }
+
+    public function run()
+    {
+        $this->server->run();
+    }
+
     private function _onOpen(SwooleWebSocketServer $server, SwooleHttpRequest $request)
     {
         // todo check origin
@@ -89,22 +111,5 @@ class HttpServer {
     private function _onClose(SwooleWebSocketServer $server, $fd)
     {
         $this->clients->del($fd);
-    }
-
-    public function on($event, callable $callback)
-    {
-        switch ($event) {
-            case 'open':
-                $this->onOpen = $callback;
-                break;
-            case 'close':
-                $this->onClose = $callback;
-                break;
-            case 'message':
-                $this->onMessage = $callback;
-                break;
-            default:
-                throw new InvalidEventException("\"{$event}\" is invalid");
-        }
     }
 }
