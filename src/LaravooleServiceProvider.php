@@ -29,11 +29,11 @@ class LaravooleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // php artisan vendor:publish --tag=laravoole
-        $this->registerPublishes();
-
         // load config
         $this->mergeConfigFrom(__DIR__ . '/../config/laravoole.php', 'laravoole');
+
+        // php artisan vendor:publish --tag=laravoole
+        $this->registerPublishes();
 
         // register command
         $this->commands(Service::class);
@@ -118,8 +118,7 @@ class LaravooleServiceProvider extends ServiceProvider
     }
 
     /**
-     * bind Server::class
-     * alias laravoole.server
+     * bind Server::class, alias is laravoole.server
      * @return void
      */
     protected function registerServer()
@@ -133,6 +132,7 @@ class LaravooleServiceProvider extends ServiceProvider
                 return $this->newHttpServer();
             });
         }
+
         $this->app->alias(Server::class, 'laravoole.server');
     }
 }
