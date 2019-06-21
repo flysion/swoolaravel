@@ -103,7 +103,7 @@ class Server implements \Lee2son\Laravoole\Server {
         $this->process_mode = $process_mode;
         $this->sock_type = $sock_type;
 
-        $this->swoole_server = new \Swoole\Http\Server($host, $port, $process_mode, $sock_type);
+        $this->swoole_server = new SwooleHttpServer($host, $port, $process_mode, $sock_type);
         $this->swoole_server->set($config);
 
 //        if($process_mode !== SWOOLE_BASE) parent::on('Start', function($server) { $this->onStart($server); });
