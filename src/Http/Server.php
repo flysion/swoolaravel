@@ -1,32 +1,16 @@
 <?php
 namespace Lee2son\Laravoole\Http;
 
+use Lee2son\Laravoole\Exceptions\InvalidEventException;
 use Swoole\Http\Server as SwooleHttpServer;
-use Illuminate\Contracts\Http\Kernel;
+use Swoole\Http\Request as SwooleHttpRequest;
+use Swoole\Http\Response as SwooleHttpResponse;
 use Lee2son\Laravoole\HttpKernel;
 use Lee2son\Laravoole\ConsoleKernel;
 
 class Server implements \Lee2son\Laravoole\Server {
 
-    /**
-     * @var callback
-     */
-    protected $onStart = null;
-
-    /**
-     * @var callback
-     */
-    protected $onShutdown = null;
-
-    /**
-     * @var callback
-     */
-    protected $onManagerStart = null;
-
-    /**
-     * @var callback
-     */
-    protected $onManagerStop = null;
+    const SWOOLE_SERVER = SwooleHttpServer::class;
 
     /**
      * @var callback
@@ -34,60 +18,24 @@ class Server implements \Lee2son\Laravoole\Server {
     protected $onWorkerStart = null;
 
     /**
-     * @var callback
+     * @var array $settings by swoole_server::set
      */
-    protected $onWorkerStop = null;
+    protected $settings;
 
     /**
-     * @var callback
+     * @var int see https://wiki.swoole.com/wiki/page/353.html
      */
-    protected $onWorkerExit = null;
+    protected $process_mode;
 
     /**
-     * @var callback
+     * @var int
      */
-    protected $onWorkerError = null;
+    protected $sock_type;
 
     /**
-     * @var callback
+     * @var SwooleHttpServer
      */
-    protected $onClose = null;
-
-    /**
-     * @var callback
-     */
-    protected $onTask = null;
-
-    /**
-     * @var callback
-     */
-    protected $onTaskCoroutine = null;
-
-    /**
-     * @var callback
-     */
-    protected $onFinish = null;
-
-    /**
-     * @var callback
-     */
-    protected $onPipeMessage = null;
-
-    /**
-     * @var callback
-     */
-    protected $onRequest = null;
-
-    protected $config;
-
-    private $process_mode;
-
-    private $sock_type;
-
-    /**
-     * @var null|SwooleHttpServer
-     */
-    private $swoole_server = null;
+    protected $swoole_server = null;
 
     /**
      * Server constructor.
@@ -97,67 +45,125 @@ class Server implements \Lee2son\Laravoole\Server {
      * @param null $process_mode
      * @param null $sock_type
      */
-    public function __construct($host, $port, $config, $process_mode = null, $sock_type = null)
+    public function __construct($host, $port, $settings, $process_mode = null, $sock_type = null)
     {
-        $this->config = $config;
+        $this->settings = $settings;
         $this->process_mode = $process_mode;
         $this->sock_type = $sock_type;
 
-        $this->swoole_server = new SwooleHttpServer($host, $port, $process_mode, $sock_type);
-        $this->swoole_server->set($config);
+        $server_name = static::SWOOLE_SERVER;
 
-//        if($process_mode !== SWOOLE_BASE) parent::on('Start', function($server) { $this->onStart($server); });
-//        parent::on('ManagerStart', function($server) { $this->onManagerStart($server); });
-//        parent::on('WorkerStart', function($server, $worker_id) { $this->onWorkerStart($server, $worker_id); });
+        $this->swoole_server = new $server_name($host, $port, $process_mode, $sock_type);
+        $this->swoole_server->set($settings);
+
+        $this->swoole_server->on('WorkerStart', function($server, $worker_id) { $this->onWorkerStart($server, $worker_id); });
+        $this->swoole_server->on('Request', function(SwooleHttpRequest $req, SwooleHttpResponse $resp) { $this->onRequest($req, $resp); });
     }
 
-//    public function on($event_name, callable $callback)
-//    {
-//        $event_name = 'on' . $event_name;
-//        $this->$event_name = $callback;
-//    }
-//
-//    public function __call($name, $arguments)
-//    {
-//        if(substr($name, 0, 2) === 'on' and property_exists($this, $name))
-//        {
-//            $this->$name = $arguments[0];
-//        }
-//    }
-
-    protected function onStart($server)
+    /**
+     * register kernel
+     * @return void
+     */
+    public function registerKernel()
     {
-        if(@$this->config['master_name']) {
-            swoole_set_process_name($this->config['master_name']);
-        }
+        app()->singleton(\Illuminate\Contracts\Http\Kernel::class, HttpKernel::class);
+        app()->singleton(\Illuminate\Contracts\Console\Kernel::class, ConsoleKernel::class);
     }
 
-    protected function onManagerStart($server)
+    /**
+     * kernel boostrap
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @return void
+     */
+    public function kernelBoostrap()
     {
-        if(@$this->config['manager_name']) {
-            swoole_set_process_name($this->config['manager_name']);
-        }
-
-        global $app;
-
-        $consoleKernel = $app->make(Kernel::class);
+        $consoleKernel = app()->make(\Illuminate\Contracts\Console\Kernel::class);
         $consoleKernel->bootstrap();
+    }
+
+    public function on($event_name, callable $callback)
+    {
+        if($event_name === 'Request')
+        {
+            throw new InvalidEventException("\"{$event_name}\" is not allow");
+        }
+
+        $prototype = 'on' . $event_name;
+        if(property_exists($this, $prototype))
+        {
+            $this->$prototype = $callback;
+        } else {
+            $this->swoole_server->on($event_name, $callback);
+        }
     }
 
     protected function onWorkerStart($server, $worker_id)
     {
-        if(@$this->config['task_name_prefix'] && $worker_id >= $this->config['worker_num']) {
-            swoole_set_process_name($this->config['task_name_prefix'] . $worker_id);
-        } elseif(@$this->config['event_name_prefix']) {
-            swoole_set_process_name($this->config['event_name_prefix'] . $worker_id);
+        $isTaskWorker = $worker_id >= $this->settings['worker_num'];
+
+        $this->registerKernel();
+        $this->kernelBoostrap();
+
+        if(is_callable($this->onWorkerStart))
+        {
+            call_user_func($this->onWorkerStart, $server, $worker_id, $isTaskWorker);
         }
     }
 
-    public function loadKernel()
+    protected function onRequest(SwooleHttpRequest $req, SwooleHttpResponse $resp)
     {
-        global $app;
+        $request = swoole_request_to_laravel_request($req);
 
-        $app->singleton(Kernel::class, HttpKernel::class);
-        $app->singleton(Kernel::class, ConsoleKernel::class);
+        /**
+         * @var HttpKernel
+         */
+        $httpKernel = app()->make(Illuminate\Contracts\Http\Kernel::class);
+
+        /**
+         * @var $response \Illuminate\Http\Response
+         */
+        $response = $httpKernel->handle($request);
+
+        // http headers
+        $headers = $response->headers->allPreserveCaseWithoutCookies();
+        foreach ($headers as $name => $values) {
+            foreach ($values as $value) {
+                $resp->header($name, $value);
+            }
+        }
+
+        // http cookies
+        foreach ($response->headers->getCookies() as $cookie) {
+            if ($cookie->isRaw()) {
+                $resp->rawcookie(
+                    $cookie->getName(),
+                    $cookie->getValue(),
+                    $cookie->getExpiresTime(),
+                    $cookie->getPath(),
+                    $cookie->getDomain(),
+                    $cookie->isSecure(),
+                    $cookie->isHttpOnly()
+                );
+            } else {
+                $resp->cookie(
+                    $cookie->getName(),
+                    $cookie->getValue(),
+                    $cookie->getExpiresTime(),
+                    $cookie->getPath(),
+                    $cookie->getDomain(),
+                    $cookie->isSecure(),
+                    $cookie->isHttpOnly()
+                );
+            }
+        }
+
+        // http status
+        $resp->status($response->status());
+
+        // http body
+        $resp->end($response->getContent());
+
+        // laravel terminate
+        $httpKernel->terminate($request, $response);
     }
 }

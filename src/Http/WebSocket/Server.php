@@ -1,22 +1,11 @@
 <?php
 namespace Lee2son\Laravoole\Http\WebSocket;
 
+use Swoole\WebSocket\Server as SwooleWebSocketServer;
+
 class Server extends \Lee2son\Laravoole\Http\Server {
 
-    /**
-     * @var callback
-     */
-    protected $onOpen = null;
-
-    /**
-     * @var callback
-     */
-    protected $onMessage = null;
-
-    /**
-     * @var callback
-     */
-    protected $onHandShake = null;
+    const SWOOLE_SERVER = SwooleWebSocketServer::class;
 
     /**
      * Server constructor.
