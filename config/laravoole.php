@@ -1,20 +1,21 @@
 <?php
 return [
+    'enable_websocket' => true,
+
     'host' => env('LARAVOOLE_HOST', '0.0.0.0'),
-    'port' => env('LARAVOOLE_PORT', '9092'),
+    'port' => env('LARAVOOLE_PORT', '9999'),
 
     // see https://wiki.swoole.com/wiki/page/353.html
-    'process_type' => SWOOLE_PROCESS,
+    'process_mode' => SWOOLE_PROCESS,
 
     // see https://wiki.swoole.com/wiki/page/620.html
     'server_options' => [
+        'master_name' => 'swoole-laravel-server-master',
+        'manager_name' => 'swoole-laravel-server-manager',
+        'task_name_prefix' => 'swoole-laravel-server-task-',
+        'event_name_prefix' => 'swoole-laravel-server-event-',
+        'worker_num' => 2,
+        'task_worker_num' => 2,
         'upload_tmp_dir' => env('LARAVOOLE_TMP_DIR', '/tmp'),
     ],
-
-    'client_options' => [
-        'max_size' => 100000,
-        'columns' => [
-
-        ]
-    ]
 ];
