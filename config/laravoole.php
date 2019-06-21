@@ -14,8 +14,10 @@ return [
         'manager_name' => 'swoole-laravel-server-manager',
         'task_name_prefix' => 'swoole-laravel-server-task-',
         'event_name_prefix' => 'swoole-laravel-server-event-',
+
         'worker_num' => 2,
         'task_worker_num' => 2,
-        'upload_tmp_dir' => env('LARAVOOLE_TMP_DIR', '/tmp'),
+
+        'upload_tmp_dir' => storage_path('upload_tmp'),
     ],
 ];

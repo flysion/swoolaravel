@@ -67,11 +67,11 @@ class LaravooleServiceProvider extends ServiceProvider
     protected function newHttpServer() : HttpServer
     {
         return new HttpServer(
-            $this->config->get('host'),
-            $this->config->get('port'),
-            $this->config->get('server_options'),
-            $this->config->get('process_mode'),
-            $this->config->get('sock_type')
+            $this->config('host'),
+            $this->config('port'),
+            $this->config('server_options'),
+            $this->config('process_mode'),
+            $this->config('sock_type')
         );
     }
 
@@ -82,11 +82,11 @@ class LaravooleServiceProvider extends ServiceProvider
     protected function newWebSocketServer() : WebSocketServer
     {
         return new WebSocketServer(
-            $this->config->get('host'),
-            $this->config->get('port'),
-            $this->config->get('server_options'),
-            $this->config->get('process_mode'),
-            $this->config->get('sock_type')
+            $this->config('host'),
+            $this->config('port'),
+            $this->config('server_options'),
+            $this->config('process_mode'),
+            $this->config('sock_type')
         );
     }
 
@@ -109,7 +109,7 @@ class LaravooleServiceProvider extends ServiceProvider
      */
     protected function registerServer()
     {
-        if($this->config->get('enable_websocket', false)) {
+        if($this->config('enable_websocket', false)) {
             $this->app->singleton(Server::class, function () {
                 return $this->newWebSocketServer();
             });
