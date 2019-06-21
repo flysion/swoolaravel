@@ -100,10 +100,10 @@ class LaravooleServiceProvider extends ServiceProvider
     {
         $route_file = base_path('routes/webserver.php');
         $this->loadRoutesFrom($route_file);
-//        if(file_exists($route_file))
-//        {
-//            $this->loadRoutesFrom($route_file);
-//        }
+        if(file_exists($route_file))
+        {
+            $this->loadRoutesFrom($route_file);
+        }
     }
 
     /**
