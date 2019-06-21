@@ -47,7 +47,7 @@
   },
   "scripts": {
     "post-package-install": [
-      "@php artisan vendor:publish --tag=laravoole"
+
     ],
     "pre-package-uninstall": [
 
