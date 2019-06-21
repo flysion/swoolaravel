@@ -30,7 +30,7 @@ class LaravooleServiceProvider extends ServiceProvider
     public function register()
     {
         // load config
-        $this->mergeConfigFrom(__DIR__ . '/../config/laravoole.php', 'laravoole');
+        $this->mergeConfigFrom(__DIR__ . '/../config/webserver.php', 'webserver');
 
         // php artisan vendor:publish --tag=laravoole
         $this->registerPublishes();
@@ -54,7 +54,7 @@ class LaravooleServiceProvider extends ServiceProvider
     protected function config($key = null, $default = null)
     {
         if($this->config === null) {
-            $this->config = new Repository(config('laravoole'));
+            $this->config = new Repository(config('webserver'));
         }
 
         if(!$key) return $this->config;
@@ -113,7 +113,7 @@ class LaravooleServiceProvider extends ServiceProvider
     protected function registerPublishes()
     {
         $this->publishes([
-            __DIR__ . '/../config/laravoole.php' => base_path('config/laravoole.php'),
+            __DIR__ . '/../config/webserver.php' => base_path('config/webserver.php'),
             __DIR__ . '/../routes/webserver.php' => base_path('routes/webserver.php')
         ], 'laravoole');
     }
