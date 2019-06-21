@@ -1,6 +1,8 @@
 <?php namespace Lee2son\Laravoole;
 
-class HttpKernel extends App\Http\Kernel
+use App\Http\Kernel;
+
+class HttpKernel extends Kernel
 {
 
 }
