@@ -119,7 +119,7 @@ class Server implements \Lee2son\Laravoole\Server {
         /**
          * @var HttpKernel
          */
-        $httpKernel = app()->make(Illuminate\Contracts\Http\Kernel::class);
+        $httpKernel = app()->make(\Illuminate\Contracts\Http\Kernel::class);
 
         /**
          * @var $response \Illuminate\Http\Response
