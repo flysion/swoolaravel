@@ -39,11 +39,11 @@ class Server implements \Lee2son\Laravoole\Server {
 
     /**
      * Server constructor.
-     * @param $host
-     * @param $port
-     * @param $config
-     * @param null $process_mode
-     * @param null $sock_type
+     * @param string $host
+     * @param string $port
+     * @param array $settings
+     * @param int $process_mode see https://wiki.swoole.com/wiki/page/353.html
+     * @param int $sock_type
      */
     public function __construct($host, $port, $settings, $process_mode = null, $sock_type = null)
     {
