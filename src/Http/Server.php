@@ -81,16 +81,19 @@ class Server implements \Lee2son\Laravoole\Server {
         $consoleKernel->bootstrap();
     }
 
+    public function __call($name, $arguments)
+    {
+        return call_user_func_array([$this->swoole_server, $name], $arguments);
+    }
+
     public function on($event_name, callable $callback)
     {
-        if($event_name === 'Request')
-        {
+        if($event_name === 'Request') {
             throw new InvalidEventException("\"{$event_name}\" is not allow");
         }
 
         $prototype = 'on' . $event_name;
-        if(property_exists($this, $prototype))
-        {
+        if (property_exists($this, $prototype)) {
             $this->$prototype = $callback;
         } else {
             $this->swoole_server->on($event_name, $callback);
@@ -104,8 +107,7 @@ class Server implements \Lee2son\Laravoole\Server {
         $this->registerKernel();
         $this->kernelBoostrap();
 
-        if(is_callable($this->onWorkerStart))
-        {
+        if (is_callable($this->onWorkerStart)) {
             call_user_func($this->onWorkerStart, $server, $worker_id, $isTaskWorker);
         }
     }
