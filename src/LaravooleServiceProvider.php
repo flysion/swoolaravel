@@ -38,15 +38,11 @@ class LaravooleServiceProvider extends ServiceProvider
         // register command
         $this->commands([Service::class]);
 
+        // load route
+        $this->loadRoute();
+
         // bind server
         $this->registerServer();
-
-        // load route
-        $route_file = base_path('routes/webserver.php');
-        if(file_exists($route_file))
-        {
-            $this->loadRoutesFrom($route_file);
-        }
     }
 
     /**
@@ -94,6 +90,19 @@ class LaravooleServiceProvider extends ServiceProvider
             $this->config('process_mode'),
             $this->config('sock_type')
         );
+    }
+
+    /**
+     * load route
+     * @return void
+     */
+    protected function loadRoute()
+    {
+        $route_file = base_path('routes/webserver.php');
+        if(file_exists($route_file))
+        {
+            $this->loadRoutesFrom($route_file);
+        }
     }
 
     /**
