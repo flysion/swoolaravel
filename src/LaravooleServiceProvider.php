@@ -99,10 +99,11 @@ class LaravooleServiceProvider extends ServiceProvider
     protected function loadRoute()
     {
         $route_file = base_path('routes/webserver.php');
-        if(file_exists($route_file))
-        {
-            $this->loadRoutesFrom($route_file);
-        }
+        $this->loadRoutesFrom($route_file);
+//        if(file_exists($route_file))
+//        {
+//            $this->loadRoutesFrom($route_file);
+//        }
     }
 
     /**
@@ -113,7 +114,7 @@ class LaravooleServiceProvider extends ServiceProvider
     {
         $this->publishes([
             __DIR__ . '/../config/laravoole.php' => base_path('config/laravoole.php'),
-            __DIR__ . '/../routes/websocket.php' => base_path('routes/websocket.php')
+            __DIR__ . '/../routes/webserver.php' => base_path('routes/webserver.php')
         ], 'laravoole');
     }
 
