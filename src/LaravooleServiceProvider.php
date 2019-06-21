@@ -36,7 +36,7 @@ class LaravooleServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/laravoole.php', 'laravoole');
 
         // register command
-        $this->commands([Service::class]);
+        $this->commands(Service::class);
 
         // load route
         $this->loadRoute();
