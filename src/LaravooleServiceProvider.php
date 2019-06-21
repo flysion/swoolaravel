@@ -42,7 +42,11 @@ class LaravooleServiceProvider extends ServiceProvider
         $this->registerServer();
 
         // load route
-        $this->loadRoutesFrom(base_path('routes/webserver.php'));
+        $route_file = base_path('routes/webserver.php');
+        if(file_exists($route_file))
+        {
+            $this->loadRoutesFrom($route_file);
+        }
     }
 
     /**
