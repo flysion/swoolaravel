@@ -1,5 +1,4 @@
-<?php
-namespace Lee2son\Laravoole\Http\WebSocket;
+<?php namespace Lee2son\Laravoole\Http\WebSocket;
 
 use Swoole\WebSocket\Server as SwooleWebSocketServer;
 

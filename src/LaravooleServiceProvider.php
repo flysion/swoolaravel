@@ -1,5 +1,4 @@
-<?php
-namespace Lee2son\Laravoole;
+<?php namespace Lee2son\Laravoole;
 
 use Illuminate\Config\Repository;
 use Illuminate\Support\ServiceProvider;

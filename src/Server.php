@@ -1,5 +1,4 @@
-<?php
-namespace Lee2son\Laravoole;
+<?php namespace Lee2son\Laravoole;
 
 interface Server {
 

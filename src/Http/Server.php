@@ -1,5 +1,4 @@
-<?php
-namespace Lee2son\Laravoole\Http;
+<?php namespace Lee2son\Laravoole\Http;
 
 use Lee2son\Laravoole\Exceptions\InvalidEventException;
 use Swoole\Http\Server as SwooleHttpServer;
@@ -102,13 +101,12 @@ class Server implements \Lee2son\Laravoole\Server {
 
     protected function onWorkerStart($server, $worker_id)
     {
-        $isTaskWorker = $worker_id >= $this->settings['worker_num'];
-
         $this->registerKernel();
         $this->kernelBoostrap();
 
         if (is_callable($this->onWorkerStart)) {
-            call_user_func($this->onWorkerStart, $server, $worker_id, $isTaskWorker);
+            $task_id = max(-1, $worker_id - $this->settings['worker_num']);
+            call_user_func($this->onWorkerStart, $server, $worker_id, $task_id);
         }
     }
 

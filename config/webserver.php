@@ -10,8 +10,8 @@ return [
 
     // see https://wiki.swoole.com/wiki/page/620.html
     'server_options' => [
-        'worker_num' => 2,
-        'task_worker_num' => 2,
+        'worker_num' => swoole_cpu_num() * 4,
+        'task_worker_num' => swoole_cpu_num() * 4,
         'upload_tmp_dir' => storage_path('upload_tmp'),
     ],
 ];
