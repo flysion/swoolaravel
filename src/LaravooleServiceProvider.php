@@ -51,11 +51,13 @@ class LaravooleServiceProvider extends ServiceProvider
      * @param null $default
      * @return mixed
      */
-    protected function config($key, $default = null)
+    protected function config($key = null, $default = null)
     {
         if($this->config === null) {
             $this->config = new Repository(config('laravoole'));
         }
+
+        if(!$key) return $this->config;
 
         return $this->config->get($key, $default);
     }
