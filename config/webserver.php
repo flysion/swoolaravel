@@ -18,10 +18,7 @@ return [
     'client_table' => [
         'max_size' => 0,
         'columns' => [
-            'fd' => \Swoole\Table::TYPE_INT,
-            'time' => \Swoole\Table::TYPE_INT,
-            'last_active_time' => \Swoole\Table::TYPE_INT,
-            'uid' => \Swoole\Table::TYPE_INT,
+
         ],
     ],
 ];
