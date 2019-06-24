@@ -9,11 +9,6 @@ use Lee2son\Laravoole\Commands\Service;
 class LaravooleServiceProvider extends ServiceProvider
 {
     /**
-     * @var Repository
-     */
-    protected $config = null;
-
-    /**
      * Bootstrap any application services.
      * @return void
      */
@@ -42,53 +37,6 @@ class LaravooleServiceProvider extends ServiceProvider
 
         // bind server
         $this->registerServer();
-    }
-
-    /**
-     * get config from config/laravoole.php
-     * @param $key
-     * @param null $default
-     * @return mixed
-     */
-    protected function config($key = null, $default = null)
-    {
-        if($this->config === null) {
-            $this->config = new Repository(config('webserver'));
-        }
-
-        if(!$key) return $this->config;
-
-        return $this->config->get($key, $default);
-    }
-
-    /**
-     * create a HttpServer
-     * @return HttpServer
-     */
-    protected function newHttpServer() : HttpServer
-    {
-        return new HttpServer(
-            $this->config('host'),
-            $this->config('port'),
-            $this->config('server_options'),
-            $this->config('process_mode'),
-            $this->config('sock_type')
-        );
-    }
-
-    /**
-     * create a WebSocketServer
-     * @return WebSocketServer
-     */
-    protected function newWebSocketServer() : WebSocketServer
-    {
-        return new WebSocketServer(
-            $this->config('host'),
-            $this->config('port'),
-            $this->config('server_options'),
-            $this->config('process_mode'),
-            $this->config('sock_type')
-        );
     }
 
     /**
@@ -122,16 +70,6 @@ class LaravooleServiceProvider extends ServiceProvider
      */
     protected function registerServer()
     {
-        if($this->config('enable_websocket', false)) {
-            $this->app->singleton(Server::class, function () {
-                return $this->newWebSocketServer();
-            });
-        } else {
-            $this->app->singleton(Server::class, function () {
-                return $this->newHttpServer();
-            });
-        }
-
         $this->app->alias(Server::class, 'laravoole.server');
     }
 }

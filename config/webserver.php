@@ -1,7 +1,5 @@
 <?php
 return [
-    'enable_websocket' => true,
-
     'host' => env('LARAVOOLE_HOST', '0.0.0.0'),
     'port' => env('LARAVOOLE_PORT', '9999'),
     // see https://wiki.swoole.com/wiki/page/353.html
@@ -9,9 +7,21 @@ return [
     'sock_type' => SWOOLE_SOCK_TCP,
 
     // see https://wiki.swoole.com/wiki/page/620.html
-    'server_options' => [
-        'worker_num' => swoole_cpu_num() * 4,
-        'task_worker_num' => swoole_cpu_num() * 4,
+    'settings' => [
+        'process_name_prefix' => 'swoole-laravoole-',
+        'worker_num' => swoole_cpu_num() * 2,
+        'task_worker_num' => swoole_cpu_num() * 2,
         'upload_tmp_dir' => storage_path('upload_tmp'),
+    ],
+
+    // client table see https://wiki.swoole.com/wiki/page/257.html
+    'client_table' => [
+        'max_size' => 0,
+        'columns' => [
+            'fd' => \Swoole\Table::TYPE_INT,
+            'time' => \Swoole\Table::TYPE_INT,
+            'last_active_time' => \Swoole\Table::TYPE_INT,
+            'uid' => \Swoole\Table::TYPE_INT,
+        ],
     ],
 ];
