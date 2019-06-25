@@ -5,7 +5,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | server 进程模式。see https://wiki.swoole.com/wiki/page/353.html
+    | server 进程模式（ https://wiki.swoole.com/wiki/page/353.html ）
     |--------------------------------------------------------------------------
     |
     | SWOOLE_BASE 模式下不会主动触发 onStart 事件，亦没有 master 进程
@@ -18,7 +18,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | server 选项。see https://wiki.swoole.com/wiki/page/274.html
+    | server 选项（ see https://wiki.swoole.com/wiki/page/274.html ）
     |--------------------------------------------------------------------------
     |
     | 其中增加一个选项：process_name_prefix，用于通过 swoole_set_process_name 设置进程名称：
@@ -39,12 +39,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | 启用 websocket 时会用到，设置 client 的属性
+    | 启用 websocket 时会用到，设置 client 的属性（ https://wiki.swoole.com/wiki/page/257.html ）
     |--------------------------------------------------------------------------
     |
     | 如果 columns 为空数组则不会为每个连接创建 client
     | 通过 app('laravoole.server')->clients 可以获得所有的 client
-    | \Swoole\Table 文档：https://wiki.swoole.com/wiki/page/257.html
     |
     */
 
