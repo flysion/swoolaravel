@@ -45,3 +45,9 @@
     php artisan vendor:publish --tag=laravoole
     
 复制完成后在 `config/webserver.php` 中修改配置
+
+
+**代码并不复杂且有详尽的注释，开发者自行查阅源代码进一步开拓使用方法**
+
+## 开发计划
+1. 向分布式迈进，增加消息中间件用于服务器间通信
