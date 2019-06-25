@@ -1,5 +1,6 @@
 <?php namespace Lee2son\Laravoole\Http;
 
-interface Worker {
+class Kernel extends \App\Http\Kernel
+{
 
 }

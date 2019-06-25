@@ -1,11 +1,17 @@
-<?php namespace Lee2son\Laravoole\Http\WebSocket;
+<?php namespace Lee2son\Laravoole\Server;
 
-class Server extends \Lee2son\Laravoole\Http\Server {
+use Swoole\Table as SwooleTable;
+use Swoole\WebSocket\Server as SwooleWebsocketServer;
+use Swoole\Http\Request as SwooleHttpRequest;
+use Swoole\WebSocket\Frame as SwooleWebSocketFrame;
+use Illuminate\Http\Request;
 
-    const SWOOLE_SERVER = \Swoole\WebSocket\Server::class;
+class WebSocket extends Http {
+
+    const SWOOLE_SERVER = SwooleWebsocketServer::class;
 
     /**
-     * @var \Swoole\Table|null
+     * @var SwooleTable|null
      */
     public $clients = null;
 
@@ -16,7 +22,7 @@ class Server extends \Lee2son\Laravoole\Http\Server {
     {
         $config = config('webserver');
         if(count($config['client_table']['columns']) > 0) {
-            $this->clients = new \Swoole\Table($config['client_table']['max_size']);
+            $this->clients = new SwooleTable($config['client_table']['max_size']);
             foreach($config['client_table']['columns'] as $field => $type) {
                 $this->clients->column($field, $type);
             }
@@ -25,6 +31,7 @@ class Server extends \Lee2son\Laravoole\Http\Server {
 
         parent::__construct();
 
+        $this->on('Message');
         if($this->clients !== null) {
             $this->on('Open');
             $this->on('Close');
@@ -33,11 +40,11 @@ class Server extends \Lee2son\Laravoole\Http\Server {
 
     /**
      * 当WebSocket客户端与服务器建立连接并完成握手后会回调此函数 see https://wiki.swoole.com/wiki/page/401.html
-     * @param Server $server
-     * @param \Swoole\Http\Request $req
-     * @return false|[\Swoole\Websocket\Server $server, \Illuminate\Http\Request $request, int $fd, array $client]
+     * @param SwooleWebSocketServer $server
+     * @param SwooleHttpRequest $req
+     * @return false|[SwooleWebsocketServer $server, Request $request, int $fd, array $client]
      */
-    protected function onOpen($server, \Swoole\Http\Request $req)
+    protected function onOpen($server, SwooleHttpRequest $req)
     {
         $request = swoole_request_to_laravel_request($req);
 
@@ -62,10 +69,10 @@ class Server extends \Lee2son\Laravoole\Http\Server {
     /**
      * TCP客户端连接关闭后，在worker进程中回调此函数 see https://wiki.swoole.com/wiki/page/p-event/onClose.html
      * swoole-1.9.7版本修改了$reactorId参数，当服务器主动关闭连接时，底层会设置此参数为-1，可以通过判断$reactorId < 0来分辨关闭是由服务器端还是客户端发起的
-     * @param Server $server
+     * @param SwooleWebSocketServer $server
      * @param int $fd
      * @param int $reactorId
-     * @return [\Swoole\Websocket\Server $server, int $fd, int $reactorId]
+     * @return [SwooleWebSocketServer $server, int $fd, int $reactorId]
      */
     protected function onClose($server, int $fd, int $reactorId)
     {
@@ -77,12 +84,24 @@ class Server extends \Lee2son\Laravoole\Http\Server {
     }
 
     /**
+     * 当服务器收到来自客户端的数据帧时会回调此函数 see https://wiki.swoole.com/wiki/page/402.html
+     * 客户端发送的ping帧不会触发onMessage，底层会自动回复pong包
+     * @param SwooleWebSocketServer $server
+     * @param SwooleWebSocketFrame $frame
+     * @return [SwooleWebSocketServer $server, SwooleWebSocketFrame $frame]
+     */
+    protected function onMessage($server, SwooleWebSocketFrame $frame)
+    {
+        return [$server, $frame];
+    }
+
+    /**
      * 触发 onopen 事件的时候创建一个客户端，需要设置“webserver.client_table”。see https://wiki.swoole.com/wiki/page/257.html
      * @param \Illuminate\Http\Request $request
      * @param int $fd
      * @return array|null 如果返回 null 则该连接不会加入 clients （但不会关闭连接）
      */
-    protected function createClient(\Illuminate\Http\Request $request, int $fd)
+    protected function createClient(Request $request, int $fd)
     {
         return null;
     }
@@ -93,7 +112,7 @@ class Server extends \Lee2son\Laravoole\Http\Server {
      * @param int $fd
      * @return bool 如果返回 false 则连接会被关闭，同时不再触发 onopen 事件
      */
-    protected function checkOrigin(\Illuminate\Http\Request $request, int $fd) : bool
+    protected function checkOrigin(Request $request, int $fd) : bool
     {
         return true;
     }

@@ -1,5 +1,5 @@
 <?php
-namespace Lee2son\Laravoole\Commands;
+namespace Lee2son\Laravoole\Console\Commands;
 
 use Illuminate\Console\Command;
 

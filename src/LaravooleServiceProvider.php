@@ -4,7 +4,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Support\ServiceProvider;
 use \Lee2son\Laravoole\Http\WebSocket\Server as WebSocketServer;
 use \Lee2son\Laravoole\Http\Server as HttpServer;
-use Lee2son\Laravoole\Commands\Service;
+use Lee2son\Laravoole\Console\Commands\Service;
 
 class LaravooleServiceProvider extends ServiceProvider
 {
@@ -23,24 +23,15 @@ class LaravooleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // load config
         $this->mergeConfigFrom(__DIR__ . '/../config/webserver.php', 'webserver');
-
-        // php artisan vendor:publish --tag=laravoole
         $this->registerPublishes();
-
-        // register command
         $this->commands(Service::class);
-
-        // load route
         $this->loadRoute();
-
-        // bind server
         $this->registerServer();
     }
 
     /**
-     * load route
+     * 加载路由
      * @return void
      */
     protected function loadRoute()
@@ -53,7 +44,8 @@ class LaravooleServiceProvider extends ServiceProvider
     }
 
     /**
-     * register publishes
+     * 注册 publishes
+     * 通过“php artisan vendor:publish --tag=laravoole”命令把默认配置复制到相应目录去
      * @return void
      */
     protected function registerPublishes()
@@ -65,7 +57,11 @@ class LaravooleServiceProvider extends ServiceProvider
     }
 
     /**
-     * bind Server::class, alias is laravoole.server
+     * 为 Server::class 起别名
+     * 开发者需要自己绑定实体类（在 provider 的 register 中）：
+     * $this->app->singleton(Server::class, \Lee2son\Laravoole\Server\Http::class) or $this->app->singleton(Server::class, \Lee2son\Laravoole\Server\WebSocket::class)
+     * 然后就可以使用了：
+     * app('laravoole.server')->sendMessage();
      * @return void
      */
     protected function registerServer()
