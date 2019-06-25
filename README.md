@@ -40,6 +40,8 @@
 
     php artisan laravoole:service start
     
+*启动完成会看到控制台打印“hello swoole-laravel”；默认端口是“9999”，访问 http://127.0.0.1:9999 即可访问“/”路由*
+    
 ## 配置
 在修改相关配置前，需要把配置模板复制到 laravle 框架的 config 目录下，运行如下命令即可：
 
