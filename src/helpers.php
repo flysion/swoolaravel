@@ -30,7 +30,7 @@ function swoole_request_to_laravel_request(\Swoole\Http\Request $req) : \Illumin
 }
 
 /**
- * 注册内核实例，在子进程中调用，改变 app() 返回的类实例
+ * 注册内核实例
  * @return void
  */
 function kernel_register()
@@ -41,7 +41,7 @@ function kernel_register()
 
 /**
  * 启动内核（加载整个框架）
- * @return void
+ * @throws \Illuminate\Contracts\Container\BindingResolutionException
  */
 function kernel_boostrap()
 {
