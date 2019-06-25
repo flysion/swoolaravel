@@ -39,11 +39,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | 启用websocket时会用到，设置每一个 client 的属性。see https://wiki.swoole.com/wiki/page/257.html
+    | 启用 websocket 时会用到，设置 client 的属性
     |--------------------------------------------------------------------------
     |
     | 如果 columns 为空数组则不会为每个连接创建 client
     | 通过 app('laravoole.server')->clients 可以获得所有的 client
+    | \Swoole\Table 文档：https://wiki.swoole.com/wiki/page/257.html
     |
     */
 
