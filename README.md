@@ -1,7 +1,8 @@
 # swoole-laravel
 使用 swoole 作为 webserver 来搭载 laravel 框架。该组件只是对 swoole 进行最少干扰的封装，所以使用之前您需要对 swoole 和 Linux 网络编程进行一番了解
 
-[swoole wiki](https://wiki.swoole.com/wiki/index/prid-1)
+[swoole wiki](https://wiki.swoole.com/) |
+[swoole github](https://github.com/swoole/swoole-src)
 
 ## 使用方法
 
