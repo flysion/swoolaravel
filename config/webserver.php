@@ -32,6 +32,7 @@ return [
 
     'settings' => [
         'process_name_prefix' => 'swoole-laravoole-',
+        'pid_file' => storage_path('server.pid'),
         'worker_num' => swoole_cpu_num() * 2,
         'task_worker_num' => swoole_cpu_num() * 2,
         'upload_tmp_dir' => storage_path('upload_tmp'),

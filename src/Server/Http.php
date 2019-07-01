@@ -1,12 +1,10 @@
 <?php namespace Lee2son\Laravoole\Server;
 
-use Illuminate\Support\Facades\Redis;
-use Lee2son\Laravoole\Exceptions\InvalidEventException;
+use Lee2son\Laravoole\Exceptions\ServerAlreadyRunningException;
 use Lee2son\Laravoole\Server;
 use Swoole\Http\Request as SwooleHttpRequest;
 use Swoole\Http\Response as SwooleHttpResponse;
 use Swoole\Http\Serve as SwooleHttpServer;
-use Swoole\Process as SwooleProcess;
 
 class Http implements Server {
 
@@ -43,6 +41,11 @@ class Http implements Server {
     protected $swoole_server = null;
 
     /**
+     * @var null $pidf pid file handle
+     */
+    private $pidf = null;
+
+    /**
      * Server constructor.
      */
     public function __construct()
@@ -56,8 +59,21 @@ class Http implements Server {
         $server_name = static::SWOOLE_SERVER;
 
         $this->swoole_server = new $server_name($this->host, $this->port, $this->process_mode, $this->sock_type);
+
+//        // create pid file
+//        $pid_file = config('webserver.pid_file');
+//        $this->pidf = fopen($pid_file);
+//        $ok = flock($this->pidf, LOCK_EX | LOCK_NB);
+//        if(!$ok) {
+//            throw new ServerAlreadyRunningException("Server already running.");
+//        }
+//
+//        fwrite($this->pidf, swoole_pid);
+
+        // server.set
         $this->swoole_server->set($this->settings);
 
+        // bind event
         if($this->process_mode !== SWOOLE_BASE) $this->on('Start');
         $this->on('ManagerStart');
         $this->on('WorkerStart');

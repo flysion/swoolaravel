@@ -1,9 +1,6 @@
 <?php namespace Lee2son\Laravoole;
 
-use Illuminate\Config\Repository;
 use Illuminate\Support\ServiceProvider;
-use \Lee2son\Laravoole\Http\WebSocket\Server as WebSocketServer;
-use \Lee2son\Laravoole\Http\Server as HttpServer;
 use Lee2son\Laravoole\Console\Commands\Service;
 
 class LaravooleServiceProvider extends ServiceProvider
