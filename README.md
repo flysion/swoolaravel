@@ -6,39 +6,32 @@
 
 ## 使用方法
 
-安装
+1. 安装
 
-    composer require lee2son/swoole-laravel
+        composer require lee2son/swoole-laravel
     
-注册服务（在 `app/Providers/AppServiceProvider.php` 中或新建一个 provider）
+2. 注册服务（在 `app/Providers/AppServiceProvider.php` 中或新建一个 provider）
 
-    use Lee2son\Laravoole\Server\WebSocket;
-    use Lee2son\Laravoole\Server\Http;
+        use Lee2son\Laravoole\Server\WebSocket;
+        use Lee2son\Laravoole\Server\Http;
+        
+        public function register()
+        {
+            $this->app->singleton(Server::class, function () {
+                $server = new class extends WebSocket/* or Http */ {
+                    // 重写方法达到特殊目的
+                };
     
-    public function register()
-    {
-        $this->app->singleton(Server::class, function () {
-            return new class extends WebSocket/* or Http */ {
-                // coding ...
-            };
-        });
-    }
+                $server->on('Start', function() { echo "onStart\n"; });
+                // ... 绑定事件
     
-    public function boot()
-    {
-        /**
-         * @var WebSocket $server
-         */
-        $server = app('laravoole.server');
+                return $server;
+            });
+        }
+    
+3. 启动
 
-        $server->on('Start', function() {
-            echo "hello swoole-laravel\n";
-        });
-    }
-    
-启动
-
-    php artisan laravoole:service start
+        php artisan laravoole:service start
     
 *启动完成会看到控制台打印“hello swoole-laravel”；默认端口是“9999”，访问 http://127.0.0.1:9999 即可访问“/”路由*
     
