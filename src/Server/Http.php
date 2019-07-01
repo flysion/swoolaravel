@@ -43,7 +43,7 @@ class Http implements Server {
     /**
      * @var null $pidf pid file handle
      */
-    private $pidf = null;
+    private $pid_file = null;
 
     /**
      * Server constructor.
@@ -58,17 +58,14 @@ class Http implements Server {
 
         $server_name = static::SWOOLE_SERVER;
 
-        $this->swoole_server = new $server_name($this->host, $this->port, $this->process_mode, $this->sock_type);
+        $this->pid_file = fopen(config('webserver.pid_file'), 'w');
+        $ok = flock($this->pidf, LOCK_EX | LOCK_NB);
+        if(!$ok) {
+            throw new ServerAlreadyRunningException("Server already running.");
+        }
 
-//        // create pid file
-//        $pid_file = config('webserver.pid_file');
-//        $this->pidf = fopen($pid_file);
-//        $ok = flock($this->pidf, LOCK_EX | LOCK_NB);
-//        if(!$ok) {
-//            throw new ServerAlreadyRunningException("Server already running.");
-//        }
-//
-//        fwrite($this->pidf, swoole_pid);
+        $this->swoole_server = new $server_name($this->host, $this->port, $this->process_mode, $this->sock_type);
+        fwrite($this->pid_file, $this->swoole_server->master_pid);
 
         // server.set
         $this->swoole_server->set($this->settings);
