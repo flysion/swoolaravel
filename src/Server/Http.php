@@ -1,108 +1,104 @@
 <?php namespace Lee2son\Laravoole\Server;
 
-use Lee2son\Laravoole\Exceptions\ServerAlreadyRunningException;
 use Lee2son\Laravoole\Server;
-use Swoole\Http\Request as SwooleHttpRequest;
-use Swoole\Http\Response as SwooleHttpResponse;
-use Swoole\Http\Serve as SwooleHttpServer;
+use Swoole\Http\Request as SwooleHttpRequest; // see https://wiki.swoole.com/wiki/page/328.html
+use Swoole\Http\Response as SwooleHttpResponse; // see https://wiki.swoole.com/wiki/page/329.html
+use Swoole\Http\Serve as SwooleHttpServer; // see https://wiki.swoole.com/wiki/page/326.html
 
 class Http implements Server {
 
     const SWOOLE_SERVER = SwooleHttpServer::class;
 
     /**
-     * @var string
+     * @var string $host see https://wiki.swoole.com/wiki/page/326.html
      */
     public $host;
 
     /**
-     * @var string
+     * @var string $port see https://wiki.swoole.com/wiki/page/326.html
      */
     public $port;
 
     /**
-     * @var array
+     * @var array $settings see https://wiki.swoole.com/wiki/page/274.html
      */
     public $settings;
 
     /**
      * @var int see https://wiki.swoole.com/wiki/page/353.html
      */
-    public $process_mode;
+    public $processMode;
 
     /**
-     * @var int
+     * @var int $sockType see https://wiki.swoole.com/wiki/page/14.html
      */
-    public $sock_type;
+    public $sockType;
 
     /**
-     * @var SwooleHttpServer
+     * @var SwooleHttpServer $swooleServer see https://wiki.swoole.com/wiki/page/326.html
      */
-    protected $swoole_server = null;
+    protected $swooleServer = null;
 
     /**
-     * @var null $pidf pid file handle
+     * Http constructor.
+     * @param string $host see https://wiki.swoole.com/wiki/page/326.html
+     * @param string $port see https://wiki.swoole.com/wiki/page/326.html
+     * @param array $settings see https://wiki.swoole.com/wiki/page/274.html
+     * @param int $processMode see https://wiki.swoole.com/wiki/page/353.html
+     * @param int $sockType see https://wiki.swoole.com/wiki/page/14.html
      */
-    private $pid_file = null;
-
-    /**
-     * Server constructor.
-     */
-    public function __construct()
+    public function __construct($host, $port, $settings, $processMode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
     {
-        $this->host = config('webserver.host');
-        $this->port = config('webserver.port');
-        $this->settings = config('webserver.settings');
-        $this->process_mode = config('webserver.process_mode');
-        $this->sock_type = config('webserver.sock_type');
+        $this->host = $host;
+        $this->port = $port;
+        $this->settings = $settings;
+        $this->processMode = $processMode;
+        $this->sockType = $sockType;
 
-        $server_name = static::SWOOLE_SERVER;
+        $swooleServerName = static::SWOOLE_SERVER;
+        $this->swooleServer = new $swooleServerName($this->host, $this->port, $this->processMode, $this->sockType);
+        $this->swooleServer->set($this->settings);
 
-        $this->pid_file = fopen(config('webserver.pid_file'), 'w');
-        $ok = flock($this->pid_file, LOCK_EX | LOCK_NB);
-        if(!$ok) {
-            throw new ServerAlreadyRunningException("Server already running.");
+        if($this->processMode !== SWOOLE_BASE) {
+            $this->on('Start');
         }
-        fwrite($this->pid_file, posix_getpid());
-
-        unset($this->settings['pid_file']);
-        $this->swoole_server = new $server_name($this->host, $this->port, $this->process_mode, $this->sock_type);
-        $this->swoole_server->set($this->settings);
-
-        // bind event
-        if($this->process_mode !== SWOOLE_BASE) $this->on('Start');
         $this->on('ManagerStart');
         $this->on('WorkerStart');
         $this->on('Request');
     }
 
     /**
-     * If the method does not exist, call the method of swoole_server
+     * 如果调用的方法不存在，则调用 SwooleHttpServer 的方法
      * @param $name
      * @param $arguments
      * @return mixed
      */
     public function __call($name, $arguments)
     {
-        return call_user_func_array([$this->swoole_server, $name], $arguments);
+        return call_user_func_array([$this->swooleServer, $name], $arguments);
     }
 
     /**
-     * 注册回调 see https://wiki.swoole.com/wiki/page/330.html
-     * @param string $event_name
+     * 注册 SwooleHttpServer 事件。 see https://wiki.swoole.com/wiki/page/330.html
+     * 如果类已经实现了 on{$eventName} 方法，则先调用该方法，该方法返回值作为 $callback 的参数，这等于是重写 SwooleHttpServer 事件
+     * @param string $eventName
      * @param callable|null $callback
      * @return void
      */
-    public function on($event_name, callable $callback = null)
+    public function on($eventName, callable $callback = null)
     {
-        $method_name = 'on' . $event_name;
-        if (method_exists($this, $method_name)) {
-            $this->swoole_server->on($event_name, function () use($callback, $method_name) {
-                $user_callback_args = $this->$method_name(...func_get_args());
-                if(is_callable($callback) && is_array($user_callback_args)) $callback(...$user_callback_args);
+        $methodName = 'on' . $eventName;
+
+        if (method_exists($this, $methodName)) {
+            $this->swooleServer->on($eventName, function () use($callback, $methodName) {
+                $args = $this->$methodName(...func_get_args());
+
+                if(is_callable($callback) && is_array($args)) {
+                    call_user_func_array($callback, $args);
+                }
             });
         } elseif(is_callable($callback)) {
-            $this->swoole_server->on($event_name, $callback);
+            $this->swooleServer->on($eventName, $callback);
         }
     }
 
@@ -136,31 +132,28 @@ class Http implements Server {
      * 此事件在Worker进程/Task进程启动时发生。这里创建的对象可以在进程生命周期内使用 see https://wiki.swoole.com/wiki/page/p-event/onWorkerStart.html
      * 发生致命错误或者代码中主动调用exit时，Worker/Task进程会退出，管理进程会重新创建新的进程。这可能导致死循环，不停地创建销毁进程
      * onWorkerStart/onStart是并发执行的，没有先后顺序
-     * 可以通过$server->taskworker属性来判断当前是Worker进程还是Task进程
-     * 设置了worker_num和task_worker_num超过1时，每个进程都会触发一次onWorkerStart事件，可通过判断$worker_id区分不同的工作进程（see https://wiki.swoole.com/wiki/page/235.html）
+     * 可以通过 $server->taskworker 属性来判断当前是worker进程还是task进程
+     * 每个worker进程都会触发一次 onWorkerStart 事件，可通过判断 $workerId 区分不同的工作进程（see https://wiki.swoole.com/wiki/page/235.html）
      * @param SwooleHttpServer $server
      * @param int $worker_id
-     * @return [SwooleHttpServer $server, int $worker_id, int $task_id] $task_id=-1 则为 event worker 否则为 task worker
+     * @return [SwooleHttpServer $server, int $workerId, int $taskId] $taskId=-1 则为 event worker 否则为 task worker
      */
-    protected function onWorkerStart($server, $worker_id)
+    protected function onWorkerStart($server, $workerId)
     {
-        $task_id = max(-1, $worker_id - $this->settings['worker_num']);
+        $taskId = max(-1, $workerId - $this->settings['worker_num']);
 
-        swoole_set_process_name($this->settings['process_name_prefix'] . ($task_id >= 0 ? "task-{$task_id}" : "event-{$worker_id}"));
+        swoole_set_process_name($this->settings['process_name_prefix'] . "worker-{$workerId}-" .  ($taskId >= 0 ? "task-{$taskId}" : "event-{$workerId}"));
 
         kernel_register();
         kernel_boostrap();
 
+        // 为每个进程注入一个 Worker 单例
         app()->alias(Worker::class, 'laravoole.worker');
-        app()->singleton(Worker::class);
-        app('laravoole.worker')->worker_id = $worker_id;
-        app('laravoole.worker')->task_id = $task_id;
+        app()->singleton(Worker::class, function () use($workerId, $taskId) {
+            return new Worker($workerId, $taskId);
+        });
 
-        return [
-            $server,
-            $worker_id,
-            $task_id
-        ];
+        return [$server, $workerId, $taskId];
     }
 
     /**

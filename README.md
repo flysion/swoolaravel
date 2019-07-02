@@ -14,11 +14,13 @@
 
         use Lee2son\Laravoole\Server\WebSocket;
         use Lee2son\Laravoole\Server\Http;
+        use Lee2son\Laravoole\DefaultServer;
         
         public function register()
         {
             $this->app->singleton(Server::class, function () {
                 $server = new class extends WebSocket/* or Http */ {
+                    use DefaultServer; // 使用配置文件实例化server
                     // 重写方法达到特殊目的
                 };
     
