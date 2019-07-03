@@ -55,9 +55,10 @@ class LaravooleServiceProvider extends ServiceProvider
     /**
      * 为 Server::class 起别名
      * 开发者需要自己绑定实体类（在 provider 的 register 中）：
-     * $this->app->singleton(Server::class, \Lee2son\Laravoole\Server\Http::class) or $this->app->singleton(Server::class, \Lee2son\Laravoole\Server\WebSocket::class)
+     * $this->app->singleton(Server::class, \Lee2son\Laravoole\Server\Http::class)
+     * $this->app->singleton(Server::class, \Lee2son\Laravoole\Server\WebSocket::class)
      * 然后就可以使用了：
-     * app('laravoole.server')->sendMessage();
+     * app('laravoole.server')->start();
      * @return void
      */
     protected function registerServer()

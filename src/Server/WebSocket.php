@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class WebSocket extends Http {
 
-    const SWOOLE_SERVER = SwooleWebsocketServer::class;
+    const SWOOLE_SERVER_CLASS = SwooleWebsocketServer::class;
 
     /**
      * Server constructor

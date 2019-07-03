@@ -5,9 +5,10 @@ use Swoole\Http\Request as SwooleHttpRequest; // see https://wiki.swoole.com/wik
 use Swoole\Http\Response as SwooleHttpResponse; // see https://wiki.swoole.com/wiki/page/329.html
 use Swoole\Http\Serve as SwooleHttpServer; // see https://wiki.swoole.com/wiki/page/326.html
 
-class Http implements Server {
+class Http implements Server
+{
 
-    const SWOOLE_SERVER = SwooleHttpServer::class;
+    const SWOOLE_SERVER_CLASS = SwooleHttpServer::class;
 
     /**
      * @var string $host see https://wiki.swoole.com/wiki/page/326.html
@@ -55,8 +56,8 @@ class Http implements Server {
         $this->processMode = $processMode;
         $this->sockType = $sockType;
 
-        $swooleServerName = static::SWOOLE_SERVER;
-        $this->swooleServer = new $swooleServerName($this->host, $this->port, $this->processMode, $this->sockType);
+        $swooleServerClassName = static::SWOOLE_SERVER_CLASS;
+        $this->swooleServer = new $swooleServerClassName($this->host, $this->port, $this->processMode, $this->sockType);
         $this->swooleServer->set($this->settings);
 
         if($this->processMode !== SWOOLE_BASE) {
@@ -100,6 +101,16 @@ class Http implements Server {
         } elseif(is_callable($callback)) {
             $this->swooleServer->on($eventName, $callback);
         }
+    }
+
+    public function masterProcessName()
+    {
+        return $this->settings['process_name_prefix'] . 'master';
+    }
+
+    public function managerProcessName()
+    {
+        return $this->settings['process_name_prefix'] . 'manager';
     }
 
     /**
