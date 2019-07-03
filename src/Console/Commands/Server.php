@@ -22,20 +22,20 @@ class Server extends Command
         $server = app('laravoole.server');
         $server->start();
     }
-
-    public function onStop()
-    {
-        $pid = file_get_contents(config('webserver.pid_file'));
-        if($pid) {
-            system("kill -TERM {$pid}");
-        }
-    }
-
-    public function onReload()
-    {
-        $pid = file_get_contents(config('webserver.pid_file'));
-        if($pid) {
-            system("kill -USR1 {$pid}");
-        }
-    }
+//
+//    public function onStop()
+//    {
+//        $pid = file_get_contents(config('webserver.pid_file'));
+//        if($pid) {
+//            system("kill -TERM {$pid}");
+//        }
+//    }
+//
+//    public function onReload()
+//    {
+//        $pid = file_get_contents(config('webserver.pid_file'));
+//        if($pid) {
+//            system("kill -USR1 {$pid}");
+//        }
+//    }
 }

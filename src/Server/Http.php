@@ -1,5 +1,6 @@
 <?php namespace Lee2son\Laravoole\Server;
 
+use Illuminate\Support\Arr;
 use Lee2son\Laravoole\Server;
 use Swoole\Http\Request as SwooleHttpRequest; // see https://wiki.swoole.com/wiki/page/328.html
 use Swoole\Http\Response as SwooleHttpResponse; // see https://wiki.swoole.com/wiki/page/329.html
@@ -13,27 +14,27 @@ class Http implements Server
     /**
      * @var string $host see https://wiki.swoole.com/wiki/page/326.html
      */
-    public $host;
+    protected $host;
 
     /**
      * @var string $port see https://wiki.swoole.com/wiki/page/326.html
      */
-    public $port;
+    protected $port;
 
     /**
      * @var array $settings see https://wiki.swoole.com/wiki/page/274.html
      */
-    public $settings;
+    protected $settings;
 
     /**
      * @var int see https://wiki.swoole.com/wiki/page/353.html
      */
-    public $processMode;
+    protected $processMode;
 
     /**
      * @var int $sockType see https://wiki.swoole.com/wiki/page/14.html
      */
-    public $sockType;
+    protected $sockType;
 
     /**
      * @var SwooleHttpServer $swooleServer see https://wiki.swoole.com/wiki/page/326.html
@@ -55,17 +56,53 @@ class Http implements Server
         $this->settings = $settings;
         $this->processMode = $processMode;
         $this->sockType = $sockType;
+    }
 
-        $swooleServerClassName = static::SWOOLE_SERVER_CLASS;
-        $this->swooleServer = new $swooleServerClassName($this->host, $this->port, $this->processMode, $this->sockType);
-        $this->swooleServer->set($this->settings);
+    public function host()
+    {
+        return $this->host;
+    }
 
-        if($this->processMode !== SWOOLE_BASE) {
-            $this->on('Start');
+    public function port()
+    {
+        return $this->port;
+    }
+
+    public function processMode()
+    {
+        return $this->processMode;
+    }
+
+    public function settings($key = null, $default = null)
+    {
+        if($key === null) {
+            return $this->settings;
         }
-        $this->on('ManagerStart');
-        $this->on('WorkerStart');
-        $this->on('Request');
+
+        return Arr::get($this->settings, $key, $default);
+    }
+
+    public function sockType()
+    {
+        return $this->sockType;
+    }
+
+    public function swooleServer()
+    {
+        if(!$this->swooleServer) {
+            $swooleServerClassName = static::SWOOLE_SERVER_CLASS;
+            $this->swooleServer = new $swooleServerClassName($this->host(), $this->port(), $this->processMode(), $this->sockType());
+            $this->swooleServer->set($this->settings());
+
+            if($this->processMode !== SWOOLE_BASE) {
+                $this->on('Start');
+            }
+            $this->on('ManagerStart');
+            $this->on('WorkerStart');
+            $this->on('Request');
+        }
+
+        return $this->swooleServer;
     }
 
     /**
@@ -76,7 +113,7 @@ class Http implements Server
      */
     public function __call($name, $arguments)
     {
-        return call_user_func_array([$this->swooleServer, $name], $arguments);
+        return call_user_func_array([$this->swooleServer(), $name], $arguments);
     }
 
     /**
@@ -91,7 +128,7 @@ class Http implements Server
         $methodName = 'on' . $eventName;
 
         if (method_exists($this, $methodName)) {
-            $this->swooleServer->on($eventName, function () use($callback, $methodName) {
+            $this->swooleServer()->on($eventName, function () use($callback, $methodName) {
                 $args = $this->$methodName(...func_get_args());
 
                 if(is_callable($callback) && is_array($args)) {
@@ -99,18 +136,8 @@ class Http implements Server
                 }
             });
         } elseif(is_callable($callback)) {
-            $this->swooleServer->on($eventName, $callback);
+            $this->swooleServer()->on($eventName, $callback);
         }
-    }
-
-    public function masterProcessName()
-    {
-        return $this->settings['process_name_prefix'] . 'master';
-    }
-
-    public function managerProcessName()
-    {
-        return $this->settings['process_name_prefix'] . 'manager';
     }
 
     /**
@@ -122,7 +149,7 @@ class Http implements Server
      */
     protected function onStart($server)
     {
-        swoole_set_process_name($this->settings['process_name_prefix'] . 'master');
+        swoole_set_process_name($this->settings('process_name_prefix') . 'master');
 
         return [$server];
     }
@@ -134,7 +161,7 @@ class Http implements Server
      */
     protected function onManagerStart($server)
     {
-        swoole_set_process_name($this->settings['process_name_prefix'] . 'manager');
+        swoole_set_process_name($this->settings('process_name_prefix') . 'manager');
 
         return [$server];
     }
@@ -153,7 +180,7 @@ class Http implements Server
     {
         $taskId = max(-1, $workerId - $this->settings['worker_num']);
 
-        swoole_set_process_name($this->settings['process_name_prefix'] . "worker-{$workerId}-" .  ($taskId >= 0 ? "task-{$taskId}" : "event-{$workerId}"));
+        swoole_set_process_name($this->settings('process_name_prefix') . "worker-{$workerId}");
 
         kernel_register();
         kernel_boostrap();
