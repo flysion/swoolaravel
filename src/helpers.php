@@ -1,5 +1,6 @@
 <?php
 /**
+ * \Swooler\Http\Request to \Illuminate\Http\Request
  * @param \Swoole\Http\Request $req
  * @return \Illuminate\Http\Request
  */
@@ -30,21 +31,13 @@ function swoole_request_to_laravel_request(\Swoole\Http\Request $req) : \Illumin
 }
 
 /**
- * 注册内核实例
- * @return void
- */
-function kernel_register()
-{
-    app()->singleton(\Illuminate\Contracts\Http\Kernel::class, \Lee2son\Laravoole\Http\Kernel::class);
-    app()->singleton(\Illuminate\Contracts\Console\Kernel::class, \Lee2son\Laravoole\Console\Kernel::class);
-}
-
-/**
- * 启动内核（加载整个框架）
- * @throws \Illuminate\Contracts\Container\BindingResolutionException
+ * 在工作进程启动时调用，可以用来启动 laravel 内核（方能调用 laravel 方法）
  */
 function kernel_boostrap()
 {
+    app()->singleton(\Illuminate\Contracts\Http\Kernel::class, \Lee2son\Laravoole\Http\Kernel::class);
+    app()->singleton(\Illuminate\Contracts\Console\Kernel::class, \Lee2son\Laravoole\Console\Kernel::class);
+
     $consoleKernel = app()->make(\Illuminate\Contracts\Console\Kernel::class);
     $consoleKernel->bootstrap();
 }
