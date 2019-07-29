@@ -1,4 +1,4 @@
-<?php namespace Lee2son\Laravoole\Http;
+<?php namespace Lee2son\Swoolaravel\Http;
 
 class Kernel extends \App\Http\Kernel
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Lee2son\Laravoole\Exceptions;
+namespace Lee2son\Swoolaravel\Exceptions;
 
 use Throwable;
 

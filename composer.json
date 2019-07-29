@@ -27,7 +27,7 @@
       "src/helpers.php"
     ],
     "psr-4": {
-      "Lee2son\\Laravoole\\": "src"
+      "Lee2son\\Swoolaravel\\": "src"
     }
   },
   "autoload-dev": {
@@ -38,7 +38,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "Lee2son\\Laravoole\\LaravooleServiceProvider"
+        "Lee2son\\Swoolaravel\\SwoolaravelServiceProvider"
       ],
       "aliases": {
 

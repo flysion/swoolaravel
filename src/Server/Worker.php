@@ -1,4 +1,4 @@
-<?php namespace Lee2son\Laravoole\Server;
+<?php namespace Lee2son\Swoolaravel\Server;
 
 use Illuminate\Config\Repository;
 

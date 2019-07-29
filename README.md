@@ -12,9 +12,9 @@
     
 2. 注册服务（在 `app/Providers/AppServiceProvider.php` 中或新建一个 provider）
 
-        use Lee2son\Laravoole\Server\WebSocket;
-        use Lee2son\Laravoole\Server\Http;
-        use Lee2son\Laravoole\DefaultServer;
+        use Lee2son\Swoolaravel\Server\WebSocket;
+        use Lee2son\Swoolaravel\Server\Http;
+        use Lee2son\Swoolaravel\DefaultServer;
         
         public function register()
         {
@@ -33,14 +33,14 @@
     
 3. 启动
 
-        php artisan laravoole:server start
+        php artisan swoolaravel:server start
     
 *启动完成会看到控制台打印“hello swoole-laravel”；默认端口是“9999”，访问 http://127.0.0.1:9999 即可访问“/”路由*
     
 ## 配置
 在修改相关配置前，需要把配置模板复制到 laravle 框架的 config 目录下，运行如下命令即可：
 
-    php artisan vendor:publish --tag=laravoole
+    php artisan vendor:publish --tag=swoolaravel
     
 复制完成后在 `config/webserver.php` 中修改配置
 

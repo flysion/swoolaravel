@@ -1,11 +1,11 @@
 <?php
-namespace Lee2son\Laravoole\Console\Commands;
+namespace Lee2son\Swoolaravel\Console\Commands;
 
 use Illuminate\Console\Command;
 
 class Server extends Command
 {
-    protected $signature = 'laravoole:server {type}';
+    protected $signature = 'swoolaravel:server {type}';
 
     protected $description = '服务管理';
 
@@ -19,7 +19,7 @@ class Server extends Command
 
     public function onStart()
     {
-        $server = app('laravoole.server');
+        $server = app('swoolaravel.server');
         $server->start();
     }
 //

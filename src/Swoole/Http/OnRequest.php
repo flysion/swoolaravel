@@ -1,13 +1,13 @@
-<?php namespace Lee2son\Laravoole\Swoole;
+<?php namespace Lee2son\Swoolaravel\Swoole\Http;
 
-trait RewriteRequest
+trait OnRequest
 {
     protected function onRequest(Request $req, Response $resp)
     {
-        $request = swoole_request_to_laravel_request($req);
+        $request = swoole_http_request_to_laravel_http_request($req);
 
         /**
-         * @var \Lee2son\Laravoole\Http\Kernel $kernel
+         * @var \Lee2son\Swoolaravel\Http\Kernel $kernel
          */
         $kernel = app()->make(\Illuminate\Contracts\Http\Kernel::class);
 
@@ -51,5 +51,7 @@ trait RewriteRequest
         $resp->end($response->getContent());
 
         $kernel->terminate($request, $response);
+
+        return [$request, $response];
     }
 }
