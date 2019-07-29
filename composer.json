@@ -19,7 +19,6 @@
   },
   "require-dev": {
     "laravel/framework": "5.8.*",
-    "laravel/tinker": "^1.0",
     "swoole/ide-helper": "@dev"
   },
   "autoload": {

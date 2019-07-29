@@ -23,7 +23,6 @@ class SwoolaravelServiceProvider extends ServiceProvider
         $this->registerPublishes();
         $this->commands(\Lee2son\Swoolaravel\Console\Commands\Server::class);
         $this->loadRoute();
-        $this->registerServer();
     }
 
     /**
@@ -50,19 +49,5 @@ class SwoolaravelServiceProvider extends ServiceProvider
             __DIR__ . '/../config/swoolaravel.php' => base_path('config/swoolaravel.php'),
             __DIR__ . '/../routes/swoolaravel.php' => base_path('routes/swoolaravel.php')
         ], 'swoolaravel');
-    }
-
-    /**
-     * 为 Server::class 起别名
-     * 开发者需要自己绑定实体类（在 provider 的 register 中）：
-     * $this->app->singleton(Server::class, \Lee2son\Swoolaravel\Server\Http::class)
-     * $this->app->singleton(Server::class, \Lee2son\Swoolaravel\Server\WebSocket::class)
-     * 然后就可以使用了：
-     * app('swoolaravel.server')->start();
-     * @return void
-     */
-    protected function registerServer()
-    {
-        $this->app->alias(Server::class, 'swoolaravel.server');
     }
 }
