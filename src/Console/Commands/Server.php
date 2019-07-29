@@ -5,37 +5,24 @@ use Illuminate\Console\Command;
 
 class Server extends Command
 {
-    protected $signature = 'swoolaravel:server {type}';
+    protected $signature = 'swoolaravel:server {serverName} {type}';
 
     protected $description = '服务管理';
 
     public function handle()
     {
-        $method = 'on' . ucfirst($this->argument('type'));
+        $serverName = $this->argument('type');
+        $type = $this->argument('type');
+
+        $method = 'on' . ucfirst($type);
         if(method_exists($this, $method)) {
-            $this->$method();
+            $this->$method($serverName);
         }
     }
 
-    public function onStart()
+    public function onStart($serverName)
     {
-        $server = app('swoolaravel.server');
+        $server = app($serverName);
         $server->start();
     }
-//
-//    public function onStop()
-//    {
-//        $pid = file_get_contents(config('webserver.pid_file'));
-//        if($pid) {
-//            system("kill -TERM {$pid}");
-//        }
-//    }
-//
-//    public function onReload()
-//    {
-//        $pid = file_get_contents(config('webserver.pid_file'));
-//        if($pid) {
-//            system("kill -USR1 {$pid}");
-//        }
-//    }
 }
