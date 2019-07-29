@@ -1,5 +1,7 @@
 <?php namespace Lee2son\Swoolaravel\Swoole;
 
+use Lee2son\Swoolaravel\Server\Worker;
+
 trait _Server
 {
     public function on($event, callable $callback)
@@ -28,6 +30,11 @@ trait _Server
         } else {
             bootstrap_kernel(\Illuminate\Contracts\Http\Kernel::class);
         }
+
+        app()->alias(Worker::class, 'swoolaravel.worker');
+        app()->singleton(Worker::class, function() use($workerId, $taskId) {
+            return new Worker($workerId, $taskId);
+        });
 
         return [$server, $workerId, $taskId];
     }

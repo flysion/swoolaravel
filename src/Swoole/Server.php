@@ -1,6 +1,6 @@
-<?php namespace Lee2son\Swoolaravel\Swoole\Http;
+<?php namespace Lee2son\Swoolaravel\Swoole;
 
-class Server extends \Swoole\Http\Server
+class Server extends \Swoole\Server
 {
     use _Server;
 
@@ -9,6 +9,5 @@ class Server extends \Swoole\Http\Server
         parent::__construct($host, $port, $mode, $sock_type);
 
         $this->on('WorkerStart', null);
-        $this->on('Request', null);
     }
 }

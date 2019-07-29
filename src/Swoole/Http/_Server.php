@@ -1,7 +1,12 @@
 <?php namespace Lee2son\Swoolaravel\Swoole\Http;
 
-trait OnRequest
+use Swoole\Http\Request;
+use Swoole\Http\Response;
+
+trait _Server
 {
+    use \Lee2son\Swoolaravel\Swoole\_Server;
+
     protected function onRequest(Request $req, Response $resp)
     {
         $request = swoole_http_request_to_laravel_http_request($req);
