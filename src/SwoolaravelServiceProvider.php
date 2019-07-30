@@ -10,7 +10,7 @@ class SwoolaravelServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-
+        $this->loadRoute();
     }
 
     /**
@@ -20,9 +20,8 @@ class SwoolaravelServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/swoolaravel.php', 'swoolaravel');
-        $this->registerPublishes();
         $this->commands(\Lee2son\Swoolaravel\Console\Commands\Server::class);
-        $this->loadRoute();
+        $this->registerPublishes();
     }
 
     /**

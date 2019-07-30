@@ -12,19 +12,19 @@
     
 2. 注册服务（在 `app/Providers/AppServiceProvider.php` 中或新建一个 provider）
 
-        use Lee2son\Swoolaravel\Server\WebSocket;
-        use Lee2son\Swoolaravel\Server\Http;
-        use Lee2son\Swoolaravel\DefaultServer;
+        use Lee2son\Swoolaravel\Swoole\WebSocket\Server as WebSocketServer;
+        use Lee2son\Swoolaravel\Server\Http\Server as HttpServer;
         
         public function register()
         {
-            $this->app->singleton(Server::class, function () {
-                $server = new class extends WebSocket/* or Http */ {
-                    use DefaultServer; // 使用配置文件实例化server
+            $host = '127.0.0.1';
+            $port = '9999';
+            $this->app->singleton('swoolaravel.server', function () {
+                $server = new class($host, $port, SWOOLE_PROCESS, SWOOLE_SOCK_TCP) extends WebSocketServer/* or HttpServer */ {
                     // 重写方法达到特殊目的
                 };
     
-                $server->on('Start', function() { echo "onStart\n"; });
+                $server->on('Start', function() { echo "hello swoolaravel\n"; });
                 // ... 绑定事件
     
                 return $server;
@@ -33,17 +33,9 @@
     
 3. 启动
 
-        php artisan swoolaravel:server start
+        php artisan swoolaravel:server swoolaravel.server start
     
-*启动完成会看到控制台打印“hello swoole-laravel”；默认端口是“9999”，访问 http://127.0.0.1:9999 即可访问“/”路由*
-    
-## 配置
-在修改相关配置前，需要把配置模板复制到 laravle 框架的 config 目录下，运行如下命令即可：
-
-    php artisan vendor:publish --tag=swoolaravel
-    
-复制完成后在 `config/webserver.php` 中修改配置
-
+*启动完成会看到控制台打印`hello swoolaravel`；端口是`9999`，访问 `http://127.0.0.1:9999` 即可访问`/`路由*
 
 *代码并不复杂且有详尽的注释，开发者自行查阅源代码进一步开拓使用方法*
 
