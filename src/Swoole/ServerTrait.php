@@ -1,6 +1,6 @@
 <?php namespace Lee2son\Swoolaravel\Swoole;
 
-use Lee2son\Swoolaravel\Server\Worker;
+use Lee2son\Swoolaravel\Swoole\Worker;
 
 trait ServerTrait
 {

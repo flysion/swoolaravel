@@ -18,10 +18,20 @@
         public function register()
         {
             $this->app->singleton('swoolaravel.server', function () {
-                $host = '127.0.0.1';
-                $port = '9999';
-                $server = new class($host, $port, SWOOLE_PROCESS, SWOOLE_SOCK_TCP) extends WebSocketServer/* or HttpServer */ {
-                    // 重写方法达到特殊目的
+                $server = new class extends WebSocketServer/* or HttpServer */ {
+                    public function __construct()
+                    {
+                        $host = '127.0.0.1';
+                        $port = '9999';
+                        $mode = SWOOLE_PROCESS;
+                        $sock_type = SWOOLE_SOCK_TCP;
+    
+                        parent::__construct($host, $port, $mode, $sock_type);
+    
+                        $this->on('Request'); // 开启HTTP支持
+                    }
+    
+                    // TODO 重写方法达到特殊目的
                 };
     
                 $server->on('Start', function() { echo "hello swoolaravel\n"; });
