@@ -2,9 +2,9 @@
 
 use Lee2son\Swoolaravel\Server\Worker;
 
-trait _Server
+trait ServerTrait
 {
-    public function on($event, callable $callback)
+    public function on($event, callable $callback = null)
     {
         $method = 'on' . ucfirst($event);
         if (method_exists($this, $method)) {

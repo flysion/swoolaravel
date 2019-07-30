@@ -4,9 +4,9 @@ use Illuminate\Http\Request;
 use Swoole\WebSocket\Frame as SwooleWebSocketFrame;
 use Swoole\Http\Request as SwooleHttpRequest;
 
-trait _Server
+trait ServerTrait
 {
-    use \Lee2son\Swoolaravel\Swoole\Http\_Server;
+    use \Lee2son\Swoolaravel\Swoole\Http\ServerTrait;
 
     /**
      * 当WebSocket客户端与服务器建立连接并完成握手后会回调此函数 see https://wiki.swoole.com/wiki/page/401.html

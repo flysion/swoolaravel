@@ -2,7 +2,7 @@
 
 class Server extends \Swoole\Http\Server
 {
-    use _Server;
+    use ServerTrait;
 
     public function __construct($host, $port = null, $mode = null, $sock_type = null)
     {

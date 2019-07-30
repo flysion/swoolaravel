@@ -3,9 +3,9 @@
 use Swoole\Http\Request;
 use Swoole\Http\Response;
 
-trait _Server
+trait ServerTrait
 {
-    use \Lee2son\Swoolaravel\Swoole\_Server;
+    use \Lee2son\Swoolaravel\Swoole\ServerTrait;
 
     protected function onRequest(Request $req, Response $resp)
     {
