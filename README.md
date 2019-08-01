@@ -47,4 +47,10 @@
     
 *启动完成会看到控制台打印`hello swoolaravel`；端口是`9999`，访问 `http://127.0.0.1:9999` 即可访问`/`路由*
 
+## 使用说明
+
+- 在`worker`进程中注册了一个单例类`\Lee2son\Swoolaravel\Swoole\Worker`，该类在 worker 进程整个生命周期不会销毁，可用来做些全局的保存工作，例如设置一个全局变量：
+
+        app('swoolaravel.worker')->set('startTime', time());
+    
 *代码并不复杂且有详尽的注释，开发者自行查阅源代码进一步开拓使用方法*
