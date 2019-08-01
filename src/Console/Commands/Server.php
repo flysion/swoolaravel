@@ -11,7 +11,7 @@ class Server extends Command
 
     public function handle()
     {
-        $serverName = $this->argument('type');
+        $serverName = $this->argument('serverName');
         $type = $this->argument('type');
 
         $method = 'on' . ucfirst($type);

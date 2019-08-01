@@ -28,6 +28,7 @@ trait ServerTrait
         if($taskId >= 0) {
             bootstrap_kernel(\Illuminate\Contracts\Console\Kernel::class);
         } else {
+            $_ENV['APP_RUNNING_IN_CONSOLE'] = 'false';
             bootstrap_kernel(\Illuminate\Contracts\Http\Kernel::class);
         }
 

@@ -28,7 +28,7 @@
     
                         parent::__construct($host, $port, $mode, $sock_type);
     
-                        $this->on('Request'); // 开启HTTP支持
+                        $this->on('Request'); // 开启HTTP支持，如果继承自 HttpServer 就不需要加这一句
                     }
     
                     // TODO 重写方法达到特殊目的
