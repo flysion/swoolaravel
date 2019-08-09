@@ -40,8 +40,14 @@
                 return $server;
             });
         }
+        
+3. 修改 `bootstrap/app.php`
+
+        $app = new Lee2son\Swoolaravel\Foundation\Application(
+            $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
+        );
     
-3. 启动
+4. 启动
 
         php artisan swoolaravel:server swoolaravel.server start
     
