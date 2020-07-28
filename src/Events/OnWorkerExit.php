@@ -10,12 +10,12 @@ class OnWorkerExit
     /**
      * @var \Swoole\Server
      */
-    protected $server;
+    public $server;
 
     /**
      * @var int
      */
-    protected $workerId;
+    public $workerId;
 
     /**
      * @param \Swoole\Server

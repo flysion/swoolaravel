@@ -10,12 +10,12 @@ class OnHandShake
     /**
      * @var \Swoole\Http\Request
      */
-    protected $request;
+    public $request;
 
     /**
      * @var \Swoole\Http\Response
      */
-    protected $response;
+    public $response;
 
     /**
      * @param \Swoole\Http\Request $request

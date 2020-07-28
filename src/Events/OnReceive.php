@@ -10,22 +10,22 @@ class OnReceive
     /**
      * @var \Swoole\Server
      */
-    protected $server;
+    public $server;
 
     /**
      * @var int 连接的文件描述符
      */
-    protected $fd;
+    public $fd;
 
     /**
      * @var int 连接所在的 Reactor 线程 ID
      */
-    protected $reactorId;
+    public $reactorId;
 
     /**
      * @var string 收到的数据内容，可能是文本或者二进制内容
      */
-    protected $data;
+    public $data;
 
     /**
      * @param \Swoole\Server

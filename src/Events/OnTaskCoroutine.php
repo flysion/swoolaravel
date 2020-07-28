@@ -10,12 +10,12 @@ class OnTaskCoroutine
     /**
      * @var \Swoole\Server
      */
-    protected $server;
+    public $server;
 
     /**
      * @var \Swoole\Server\Task
      */
-    protected $task;
+    public $task;
 
     /**
      * @param \Swoole\Server

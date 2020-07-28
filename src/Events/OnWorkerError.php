@@ -10,27 +10,27 @@ class OnWorkerError
     /**
      * @var \Swoole\Server
      */
-    protected $server;
+    public $server;
 
     /**
      * @var int 异常 worker 进程的 id
      */
-    protected $workerId;
+    public $workerId;
 
     /**
      * @var int 异常 worker 进程的 pid
      */
-    protected $workerPid;
+    public $workerPid;
 
     /**
      * @var int 退出的状态码，范围是 0～255
      */
-    protected $exitCode;
+    public $exitCode;
 
     /**
      * @var int 进程退出的信号
      */
-    protected $signal;
+    public $signal;
 
     /**
      * @param \Swoole\Server

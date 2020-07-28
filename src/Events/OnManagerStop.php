@@ -10,7 +10,7 @@ class OnManagerStop
     /**
      * @var \Swoole\Server
      */
-    protected $server;
+    public $server;
     /**
      * @param \Swoole\Server $server
      */

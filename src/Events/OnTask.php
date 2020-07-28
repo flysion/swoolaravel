@@ -10,22 +10,22 @@ class OnTask
     /**
      * @var \Swoole\Server
      */
-    protected $server;
+    public $server;
 
     /**
      * @var int 执行任务的 task 进程 id【$task_id 和 $src_worker_id 组合起来才是全局唯一的，不同的 worker 进程投递的任务 ID 可能会有相同】
      */
-    protected $taskId;
+    public $taskId;
 
     /**
      * @var int 投递任务的 worker 进程 id【$task_id 和 $src_worker_id 组合起来才是全局唯一的，不同的 worker 进程投递的任务 ID 可能会有相同】
      */
-    protected $srcWorkerId;
+    public $srcWorkerId;
 
     /**
      * @var string 任务的数据内容
      */
-    protected $data;
+    public $data;
 
     /**
      * @param \Swoole\Server

@@ -10,17 +10,17 @@ class OnFinish
     /**
      * @var \Swoole\Server
      */
-    protected $server;
+    public $server;
 
     /**
      * @var int 执行任务的 task 进程 id
      */
-    protected $taskId;
+    public $taskId;
 
     /**
      * @var string 任务处理的结果内容
      */
-    protected $data;
+    public $data;
 
     /**
      * @param \Swoole\Server

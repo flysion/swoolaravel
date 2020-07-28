@@ -10,17 +10,17 @@ class OnPipeMessage
     /**
      * @var \Swoole\Server
      */
-    protected $server;
+    public $server;
 
     /**
      * @var int 消息来自哪个 Worker 进程
      */
-    protected $srcWorkerId;
+    public $srcWorkerId;
 
     /**
      * @var mixed 消息内容，可以是任意 PHP 类型
      */
-    protected $message;
+    public $message;
 
     /**
      * @param \Swoole\Server

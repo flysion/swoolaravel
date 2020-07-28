@@ -10,18 +10,18 @@ class OnPacket
     /**
      * @var \Swoole\Server
      */
-    protected $server;
+    public $server;
 
     /**
      * @var string 收到的数据内容，可能是文本或者二进制内容
      */
-    protected $data;
+    public $data;
 
     /**
      * @var array 客户端信息包括 address/port/server_socket 等多项客户端信息数据，参考 UDP 服务器
      * @link https://wiki.swoole.com/#/start/start_udp_server UDP 服务器
      */
-    protected $clientInfo;
+    public $clientInfo;
 
     /**
      * @param \Swoole\Server

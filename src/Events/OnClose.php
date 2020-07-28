@@ -10,17 +10,17 @@ class OnClose
     /**
      * @var \Swoole\Server
      */
-    protected $server;
+    public $server;
 
     /**
      * @var int 连接的文件描述符
      */
-    protected $fd;
+    public $fd;
 
     /**
      * @var int 来自那个 reactor 线程，主动 close 关闭时为负数
      */
-    protected $reactorId;
+    public $reactorId;
 
     /**
      * @param \Swoole\Server

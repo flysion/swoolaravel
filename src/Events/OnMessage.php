@@ -10,13 +10,13 @@ class OnMessage
     /**
      * @var \Swoole\WebSocket\Server
      */
-    protected $server;
+    public $server;
 
     /**
      * @var \Swoole\WebSocket\Frame 是 Swoole\WebSocket\Frame 对象，包含了客户端发来的数据帧信息
      * @link https://wiki.swoole.com/#/websocket_server?id=swoolewebsocketframe \Swoole\WebSocket\Frame
      */
-    protected $frame;
+    public $frame;
 
     /**
      * @param \Swoole\WebSocket\Server $server
