@@ -11,7 +11,7 @@ use Lee2son\Swoolaravel\Events\OnOpen;
  */
 trait Server
 {
-    use \Lee2son\Swoolaravel\Swoole\Server;
+    use \Lee2son\Swoolaravel\Swoole\Http\Server;
 
     /**
      * 当 WebSocket 客户端与服务器建立连接并完成握手后会回调此函数。
@@ -23,7 +23,7 @@ trait Server
      */
     public function onOpen($server, \Swoole\Http\Request $request)
     {
-        event(new OnOpen($server, $request));
+        $this->event->dispatch(new OnOpen($server, $request));
     }
 
     /**
@@ -39,7 +39,7 @@ trait Server
      */
     public function onMessage($server, $frame)
     {
-        event(new OnMessage($server, $frame));
+        $this->event->dispatch(new OnMessage($server, $frame));
     }
 
     /**
@@ -57,6 +57,6 @@ trait Server
      */
     public function onHandShake($request, $response)
     {
-        event(new OnHandShake($request, $response));
+        $this->event->dispatch(new OnHandShake($request, $response));
     }
 }
