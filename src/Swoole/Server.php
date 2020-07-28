@@ -240,27 +240,16 @@ trait Server
      *  2.return 的变量可以是任意非 null 的 PHP 变量
      *
      * @link https://wiki.swoole.com/#/server/events?id=ontask onTask
-     * @see Server::onTaskCoroutine()
+     * @see \Swoole\Server\Task
      * @param \Swoole\Server $server
-     * @param int $taskId 执行任务的 task 进程 id【$task_id 和 $src_worker_id 组合起来才是全局唯一的，不同的 worker 进程投递的任务 ID 可能会有相同】
-     * @param int $srcWorkerId 投递任务的 worker 进程 id【$task_id 和 $src_worker_id 组合起来才是全局唯一的，不同的 worker 进程投递的任务 ID 可能会有相同】
-     * @param mixed $data 是任务的数据内容
      */
-    public function onTask($server, $taskId, $srcWorkerId, $data)
+    public function onTask($server, ...$args)
     {
-        $this->event->dispatch(new OnTask($server, $taskId, $srcWorkerId, $data));
-    }
-
-    /**
-     * V4.2.12 起如果开启了 task_enable_coroutine 这 onTask 事件响应该方法
-     *
-     * @see Server::onTask()
-     * @param \Swoole\Server $server
-     * @param \Swoole\Server\Task $task
-     */
-    public function onTaskCoroutine($server, $task)
-    {
-        $this->event->dispatch(new OnTaskCoroutine($server, $task));
+        if(($server->setting['enable_coroutine'] ?? false) && ($server->setting['task_enable_coroutine'] ?? false)) {
+            $this->event->dispatch(new OnTaskCoroutine($server, ...$args));
+        } else {
+            $this->event->dispatch(new OnTask($server, ...$args));
+        }
     }
 
     /**

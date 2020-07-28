@@ -3,7 +3,7 @@
 namespace Lee2son\Swoolaravel\Events;
 
 /**
- * @see \Lee2son\Swoolaravel\Swoole\Server::onTaskCoroutine()
+ * @see \Lee2son\Swoolaravel\Swoole\Server::onTask()
  */
 class OnTaskCoroutine
 {
