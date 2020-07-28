@@ -2,10 +2,6 @@
 
 namespace Lee2son\Swoolaravel\Swoole\WebSocket;
 
-use Lee2son\Swoolaravel\Events\OnHandShake;
-use Lee2son\Swoolaravel\Events\OnMessage;
-use Lee2son\Swoolaravel\Events\OnOpen;
-
 /**
  * @link https://wiki.swoole.com/#/websocket_server
  */
