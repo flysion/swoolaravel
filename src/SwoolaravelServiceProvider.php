@@ -1,5 +1,9 @@
 <?php namespace Lee2son\Swoolaravel;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\ServiceProvider;
 
 class SwoolaravelServiceProvider extends ServiceProvider
@@ -23,6 +27,7 @@ class SwoolaravelServiceProvider extends ServiceProvider
      */
     public function register()
     {
+
         $this->mergeConfigFrom(__DIR__ . '/../config/swoolaravel.php', 'swoolaravel');
         $this->commands($this->commands);
         $this->registerPublishes();

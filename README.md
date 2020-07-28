@@ -28,7 +28,7 @@
     
                         parent::__construct($host, $port, $mode, $sock_type);
     
-                        $this->on('Request'); // 开启HTTP支持
+                        $this->on('Request'); // 开启HTTP支持，如果继承自 HttpServer 就不需要加这一句
                     }
     
                     // TODO 重写方法达到特殊目的
@@ -40,11 +40,23 @@
                 return $server;
             });
         }
+        
+3. 修改 `bootstrap/app.php`
+
+        $app = new Lee2son\Swoolaravel\Foundation\Application(
+            $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
+        );
     
-3. 启动
+4. 启动
 
         php artisan swoolaravel:server swoolaravel.server start
     
 *启动完成会看到控制台打印`hello swoolaravel`；端口是`9999`，访问 `http://127.0.0.1:9999` 即可访问`/`路由*
 
+## 使用说明
+
+- 在`worker`进程中注册了一个单例类`\Lee2son\Swoolaravel\Swoole\Worker`，该类在 worker 进程整个生命周期不会销毁，可用来做些全局的保存工作，例如设置一个全局变量：
+
+        app('swoolaravel.worker')->set('startTime', time());
+    
 *代码并不复杂且有详尽的注释，开发者自行查阅源代码进一步开拓使用方法*
