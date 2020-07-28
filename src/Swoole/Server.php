@@ -29,12 +29,12 @@ class Server
     /**
      * @var \Swoole\Server
      */
-    protected $server;
+    public $server;
 
     /**
      * @var \Illuminate\Events\Dispatcher
      */
-    protected $event;
+    public $event;
 
     /**
      * @param null $host
