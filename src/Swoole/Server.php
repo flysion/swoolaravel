@@ -1,24 +1,6 @@
 <?php namespace Lee2son\Swoolaravel\Swoole;
 
 use Illuminate\Support\Str;
-use Lee2son\Swoolaravel\Events\OnAfterReload;
-use Lee2son\Swoolaravel\Events\OnBeforeReload;
-use Lee2son\Swoolaravel\Events\OnClose;
-use Lee2son\Swoolaravel\Events\OnConnect;
-use Lee2son\Swoolaravel\Events\OnFinish;
-use Lee2son\Swoolaravel\Events\OnManagerStart;
-use Lee2son\Swoolaravel\Events\OnManagerStop;
-use Lee2son\Swoolaravel\Events\OnPacket;
-use Lee2son\Swoolaravel\Events\OnPipeMessage;
-use Lee2son\Swoolaravel\Events\OnReceive;
-use Lee2son\Swoolaravel\Events\OnShutdown;
-use Lee2son\Swoolaravel\Events\OnStart;
-use Lee2son\Swoolaravel\Events\OnTask;
-use Lee2son\Swoolaravel\Events\OnTaskCoroutine;
-use Lee2son\Swoolaravel\Events\OnWorkerError;
-use Lee2son\Swoolaravel\Events\OnWorkerExit;
-use Lee2son\Swoolaravel\Events\OnWorkerStart;
-use Lee2son\Swoolaravel\Events\OnWorkerStop;
 use Lee2son\Swoolaravel\Worker;
 
 /**
@@ -35,14 +17,35 @@ use Lee2son\Swoolaravel\Worker;
  * @link https://wiki.swoole.com/#/server/tcp_init
  * @mixin \Swoole\Server
  * @property \Illuminate\Contracts\Events\Dispatcher $event
+ * @property \Swoole\Server $server
  */
 trait Server
 {
+    /**
+     * 监听事件 swoole 事件
+     *
+     * @param string $event
+     * @param mixed $callback
+     */
     public function listen($event, $callback)
     {
-        $method = Str::camel("on_{$event}");
-        $eventName = "\\Lee2son\\Swoolaravel\\Events\\" . ucfirst($method);
-        $this->event->listen($eventName,$callback);
+        $this->event->listen("swoole.{$event}",$callback);
+    }
+
+    /**
+     * \Swoole\Server 监听
+     *
+     * @link https://wiki.swoole.com/#/server/methods?id=on \Swoole\Server::on
+     * @param string $event
+     * @param mixed $callback
+     */
+    public function on($event, $callback)
+    {
+        $this->listen($event, $callback);
+        $this->server->on($event, function(...$args) use($event) {
+            $method = Str::camel("on_{$event}");
+            return call_user_func_array([$this, $method], $args);
+        });
     }
 
     /**
@@ -65,7 +68,7 @@ trait Server
      */
     public function onStart($server)
     {
-        $this->event->dispatch(new OnStart($server));
+        $this->event->dispatch('swoole.start', [$server]);
     }
 
     /**
@@ -84,7 +87,7 @@ trait Server
      */
     public function onShutdown($server)
     {
-        $this->event->dispatch(new OnShutdown($server));
+        $this->event->dispatch('swoole.shutdown', [$server]);
     }
 
     /**
@@ -107,7 +110,7 @@ trait Server
             return new Worker($workerId);
         });
 
-        $this->event->dispatch(new OnWorkerStart($server, $workerId));
+        $this->event->dispatch('swoole.workerStart', [$server, $workerId]);
     }
 
     /**
@@ -123,7 +126,7 @@ trait Server
      */
     public function onWorkerStop($server, $workerId)
     {
-        $this->event->dispatch(new OnWorkerStop($server, $workerId));
+        $this->event->dispatch('swoole.workerStop', [$server, $workerId]);
     }
 
     /**
@@ -136,7 +139,7 @@ trait Server
      */
     public function onWorkerExit($server, $workerId)
     {
-        $this->event->dispatch(new OnWorkerExit($server, $workerId));
+        $this->event->dispatch('swoole.workerExit', [$server, $workerId]);
     }
 
     /**
@@ -157,7 +160,7 @@ trait Server
      */
     public function onConnect($server, $fd, $reactorId)
     {
-        $this->event->dispatch(new OnConnect($server, $fd, $reactorId));
+        $this->event->dispatch('swoole.connect', [$server, $fd, $reactorId]);
     }
 
     /**
@@ -180,7 +183,7 @@ trait Server
      */
     public function onReceive($server, $fd, $reactorId, $data)
     {
-        $this->event->dispatch(new OnReceive($server, $fd, $reactorId, $data));
+        $this->event->dispatch('swoole.receive', [$server, $fd, $reactorId, $data]);
     }
 
     /**
@@ -198,7 +201,7 @@ trait Server
      */
     public function onPacket($server, $data, $clientInfo)
     {
-        $this->event->dispatch(new OnPacket($server,  $data, $clientInfo));
+        $this->event->dispatch('swoole.packet', [$server,  $data, $clientInfo]);
     }
 
     /**
@@ -225,7 +228,7 @@ trait Server
      */
     public function onClose($server, $fd, $reactorId)
     {
-        $this->event->dispatch(new OnClose($server, $fd, $reactorId));
+        $this->event->dispatch('swoole.close', [$server, $fd, $reactorId]);
     }
 
     /**
@@ -241,15 +244,10 @@ trait Server
      *
      * @link https://wiki.swoole.com/#/server/events?id=ontask onTask
      * @see \Swoole\Server\Task
-     * @param \Swoole\Server $server
      */
-    public function onTask($server, ...$args)
+    public function onTask(...$args)
     {
-        if(($server->setting['enable_coroutine'] ?? false) && ($server->setting['task_enable_coroutine'] ?? false)) {
-            $this->event->dispatch(new OnTaskCoroutine($server, ...$args));
-        } else {
-            $this->event->dispatch(new OnTask($server, ...$args));
-        }
+        $this->event->dispatch('swoole.task', $args);
     }
 
     /**
@@ -266,7 +264,7 @@ trait Server
      */
     public function onFinish($server, $taskId, $data)
     {
-        $this->event->dispatch(new OnFinish($server, $taskId, $data));
+        $this->event->dispatch('swoole.finish', [$server, $taskId, $data]);
     }
 
     /**
@@ -279,7 +277,7 @@ trait Server
      */
     public function onPipeMessage($server, $srcWorkerId, $message)
     {
-        $this->event->dispatch(new OnPipeMessage($server, $srcWorkerId, $message));
+        $this->event->dispatch('swoole.pipeMessage', [$server, $srcWorkerId, $message]);
     }
 
     /**
@@ -302,7 +300,7 @@ trait Server
      */
     public function onWorkerError($server, $workerId, $workerPid, $exitCode, $signal)
     {
-        $this->event->dispatch(new OnWorkerError($server, $workerId, $workerPid, $exitCode, $signal));
+        $this->event->dispatch('swoole.workerError', [$server, $workerId, $workerPid, $exitCode, $signal]);
     }
 
     /**
@@ -324,7 +322,7 @@ trait Server
      */
     public function onManagerStart($server)
     {
-        $this->event->dispatch(new OnManagerStart($server));
+        $this->event->dispatch('swoole.managerStart', [$server]);
     }
 
     /**
@@ -336,7 +334,7 @@ trait Server
      */
     public function onManagerStop($server)
     {
-        $this->event->dispatch(new OnManagerStop($server));
+        $this->event->dispatch('swoole.managerStop', [$server]);
     }
 
     /**
@@ -346,7 +344,7 @@ trait Server
      */
     public function onBeforeReload($server)
     {
-        $this->event->dispatch(new OnBeforeReload($server));
+        $this->event->dispatch('swoole.beforeReload', [$server]);
     }
 
     /**
@@ -356,6 +354,6 @@ trait Server
      */
     public function onAfterReload($server)
     {
-        $this->event->dispatch(new OnAfterReload($server));
+        $this->event->dispatch('swoole.afterReload', [$server]);
     }
 }

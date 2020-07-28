@@ -23,7 +23,7 @@ trait Server
      */
     public function onOpen($server, \Swoole\Http\Request $request)
     {
-        $this->event->dispatch(new OnOpen($server, $request));
+        $this->event->dispatch('swoole.open', [$server, $request]);
     }
 
     /**
@@ -39,7 +39,7 @@ trait Server
      */
     public function onMessage($server, $frame)
     {
-        $this->event->dispatch(new OnMessage($server, $frame));
+        $this->event->dispatch('swoole.message', [$server, $frame]);
     }
 
     /**
@@ -57,6 +57,6 @@ trait Server
      */
     public function onHandShake($request, $response)
     {
-        $this->event->dispatch(new OnHandShake($request, $response));
+        $this->event->dispatch('swoole.handShake', [$request, $response]);
     }
 }
