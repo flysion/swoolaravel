@@ -5,9 +5,9 @@ namespace Lee2son\Swoolaravel\Swoole\WebSocket;
 /**
  * @link https://wiki.swoole.com/#/websocket_server
  */
-trait Server
+class Server extends \Lee2son\Swoolaravel\Swoole\Http\Server
 {
-    use \Lee2son\Swoolaravel\Swoole\Http\Server;
+    const SWOOLE_SERVER_CLASS = \Swoole\WebSocket\Server::class;
 
     /**
      * 当 WebSocket 客户端与服务器建立连接并完成握手后会回调此函数。

@@ -5,9 +5,9 @@ namespace Lee2son\Swoolaravel\Swoole\Http;
 /**
  * @link https://wiki.swoole.com/#/http_server
  */
-trait Server
+class Server extends \Lee2son\Swoolaravel\Swoole\Server
 {
-    use \Lee2son\Swoolaravel\Swoole\Server;
+    const SWOOLE_SERVER_CLASS = \Swoole\Http\Server::class;
 
     /**
      * @link https://wiki.swoole.com/#/http_server?id=on onRequest

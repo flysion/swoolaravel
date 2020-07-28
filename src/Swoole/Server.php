@@ -18,11 +18,47 @@ use Lee2son\Swoolaravel\Worker;
  *
  * @link https://wiki.swoole.com/#/server/tcp_init
  * @mixin \Swoole\Server
- * @property \Illuminate\Contracts\Events\Dispatcher $event
- * @property \Swoole\Server $server
  */
-trait Server
+class Server
 {
+    /**
+     * @const swoole server 类
+     */
+    const SWOOLE_SERVER_CLASS = \Swoole\Server::class;
+
+    /**
+     * @var \Swoole\Server
+     */
+    protected $server;
+
+    /**
+     * @var \Illuminate\Events\Dispatcher
+     */
+    protected $event;
+
+    /**
+     * @param null $host
+     * @param null $port
+     * @param null $mode
+     * @param null $sockType
+     */
+    public function __construct($host = '0.0.0.0', $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
+    {
+        $class = static::SWOOLE_SERVER_CLASS;
+        $this->server = new $class($host, $port, $mode, $sockType);
+        $this->event = new \Illuminate\Events\Dispatcher();
+    }
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call($name, $arguments)
+    {
+        return call_user_func_array([$this->server, $name], $arguments);
+    }
+
     /**
      * 监听 swoole 事件
      *
