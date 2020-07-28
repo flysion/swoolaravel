@@ -22,7 +22,7 @@ use Lee2son\Swoolaravel\Worker;
 trait Server
 {
     /**
-     * 监听事件 swoole 事件
+     * 监听 swoole 事件
      *
      * @param string $event
      * @param mixed $callback
