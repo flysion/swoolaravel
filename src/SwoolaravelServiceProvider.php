@@ -4,6 +4,10 @@ use Illuminate\Support\ServiceProvider;
 
 class SwoolaravelServiceProvider extends ServiceProvider
 {
+    protected $commands = [
+        \Lee2son\Swoolaravel\Console\Commands\Server::class
+    ];
+
     /**
      * Bootstrap any application services.
      * @return void
@@ -20,7 +24,7 @@ class SwoolaravelServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/swoolaravel.php', 'swoolaravel');
-        $this->commands(\Lee2son\Swoolaravel\Console\Commands\Server::class);
+        $this->commands($this->commands);
         $this->registerPublishes();
     }
 
@@ -30,11 +34,7 @@ class SwoolaravelServiceProvider extends ServiceProvider
      */
     protected function loadRoute()
     {
-        $route_file = base_path('routes/swoolaravel.php');
-        if(file_exists($route_file))
-        {
-            $this->loadRoutesFrom($route_file);
-        }
+        $this->loadRoutesFrom(__DIR__ . '/../routes/swoolaravel.php');
     }
 
     /**
