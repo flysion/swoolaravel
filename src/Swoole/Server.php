@@ -44,7 +44,8 @@ class Server
      */
     public function __construct($host = '0.0.0.0', $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
     {
-        $this->server = new {static::SWOOLE_SERVER_CLASS}($host, $port, $mode, $sockType);
+        $class = static::SWOOLE_SERVER_CLASS;
+        $this->server = new $class($host, $port, $mode, $sockType);
         $this->event = new \Illuminate\Events\Dispatcher();
     }
 
