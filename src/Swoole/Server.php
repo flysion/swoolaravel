@@ -1,4 +1,6 @@
-<?php namespace Lee2son\Swoolaravel\Swoole;
+<?php
+
+namespace Lee2son\Swoolaravel\Swoole;
 
 use Illuminate\Support\Str;
 use Lee2son\Swoolaravel\Worker;
