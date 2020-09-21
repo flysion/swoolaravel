@@ -1,0 +1,55 @@
+{
+  "name": "lee2son/swoole-laravel",
+  "description": "使用 swoole 作为 webserver 来搭载 laravel 框架",
+  "type": "library",
+  "keywords": [
+    "swoole",
+    "websocekt",
+    "laravel"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Leeson",
+      "email": "sss60@qq.com"
+    }
+  ],
+  "require": {
+    "php": "^7.1.8"
+  },
+  "require-dev": {
+    "laravel/framework": "5.8.*",
+    "swoole/ide-helper": "@dev"
+  },
+  "autoload": {
+    "files": [
+      "src/helpers.php"
+    ],
+    "psr-4": {
+      "Lee2son\\Swoolaravel\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Lee2son\\Swoolaravel\\SwoolaravelServiceProvider"
+      ],
+      "aliases": {
+
+      }
+    }
+  },
+  "scripts": {
+    "post-package-install": [
+
+    ],
+    "pre-package-uninstall": [
+
+    ]
+  }
+}
