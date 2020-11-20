@@ -33,34 +33,3 @@ function swoole_http_request_to_laravel_http_request(\Swoole\Http\Request $reque
         $request->rawContent()
     );
 }
-
-/**
- * @param string
- * @param array $parameters
- * @param string $defaultMethod
- * @return mixed
- * @throws
- */
-function call($callback, $parameters = [], $defaultMethod = 'handle')
-{
-    if(is_callable($callback)) {
-        return call_user_func_array($callback, $parameters);
-    }
-
-    if(is_object($callback)) {
-        return call_user_func_array([$callback, $defaultMethod], $parameters);
-    }
-
-    if(is_string($callback)) {
-        if(strpos($callback, '@') === false) {
-            $class = $callback;
-            $method = $defaultMethod;
-        } else {
-            list($class, $method) = explode('@', $callback, 2);
-        }
-
-        return call([app()->make($class), $method], $parameters);
-    }
-
-    return call_user_func_array($callback, $parameters);
-}

@@ -9,9 +9,22 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/websocket_server?id=onopen onOpen
  * @link https://wiki.swoole.com/#/http_server?id=httprequest \Swoole\Http\Request
  */
-class Open
+class Open implements SwooleEvent
 {
-    const SWOOLE_EVENT_NAME = 'open';
+    /**
+     * 事件触发之前
+     */
+    const before = self::class . ':before';
+
+    /**
+     * 事件触发之后
+     */
+    const after = self::class . ':after';
+
+    /**
+     * swoole 事件名称
+     */
+    const name = 'open';
 
     /**
      * @var \Swoole\WebSocket\Server

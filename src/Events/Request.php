@@ -21,9 +21,22 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/http_server?id=httprequest \Swoole\Http\Request
  * @link https://wiki.swoole.com/#/http_server?id=httpresponse \Swoole\Http\Response
  */
-class Request
+class Request implements SwooleEvent
 {
-    const SWOOLE_EVENT_NAME = 'request';
+    /**
+     * 事件触发之前
+     */
+    const before = self::class . ':before';
+
+    /**
+     * 事件触发之后
+     */
+    const after = self::class . ':after';
+
+    /**
+     * swoole 事件名称
+     */
+    const name = 'request';
 
     /**
      * @var \Swoole\Http\Request

@@ -8,9 +8,22 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/server/events?id=onworkerexit onWorkerExit
  * @link https://wiki.swoole.com/#/question/use?id=swoole%e5%a6%82%e4%bd%95%e6%ad%a3%e7%a1%ae%e7%9a%84%e9%87%8d%e5%90%af%e6%9c%8d%e5%8a%a1 如何正确的重启服务
  */
-class WorkerExit
+class WorkerExit implements SwooleEvent
 {
-    const SWOOLE_EVENT_NAME = 'workerExit';
+    /**
+     * 事件触发之前
+     */
+    const before = self::class . ':before';
+
+    /**
+     * 事件触发之后
+     */
+    const after = self::class . ':after';
+
+    /**
+     * swoole 事件名称
+     */
+    const name = 'workerExit';
 
     /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server

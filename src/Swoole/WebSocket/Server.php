@@ -9,14 +9,16 @@ namespace Flysion\Swoolaravel\Swoole\WebSocket;
 class Server extends \Flysion\Swoolaravel\Swoole\Http\Server
 {
     /**
-     * @param \Illuminate\Config\Repository $config
-     * @return \Swoole\WebSocket\Server
+     * 创建一个 swoole server
+     *
+     * @param string $host
+     * @param int $port
+     * @param int $mode
+     * @param int $sockType
+     * @return \Swoole\Server
      */
-    protected static function createSwooleServer($config)
+    protected static function create($host, $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
     {
-        return new \Swoole\WebSocket\Server(
-            $config->get('host') ?: '0.0.0.0',
-            $config->get('port') ?? 0
-        );
+        return new \Swoole\WebSocket\Server($host, $port, $mode, $sockType);
     }
 }

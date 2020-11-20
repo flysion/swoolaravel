@@ -14,26 +14,16 @@ namespace Flysion\Swoolaravel\Swoole\Http;
 class Server extends \Flysion\Swoolaravel\Swoole\Server
 {
     /**
-     * @param \Illuminate\Config\Repository $config
-     * @return \Swoole\Http\Server
-     */
-    protected static function createSwooleServer($config)
-    {
-        return new \Swoole\Http\Server(
-            $config->get('host') ?: '0.0.0.0',
-            $config->get('port') ?? 0
-        );
-    }
-
-    /**
-     * swoole 默认设置，优先级最高，无法被其他设置覆盖
+     * 创建一个 swoole server
      *
-     * @return array
+     * @param string $host
+     * @param int $port
+     * @param int $mode
+     * @param int $sockType
+     * @return \Swoole\Server
      */
-    protected function defaultSetting()
+    protected static function create($host, $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
     {
-        return array_merge(parent::defaultSetting(), [
-            'open_http_protocol' => true,
-        ]);
+        return new \Swoole\Http\Server($host, $port, $mode, $sockType);
     }
 }

@@ -21,38 +21,37 @@ use Flysion\Swoolaravel\Events\WorkerStart;
  * @link https://wiki.swoole.com/#/server/events?id=%e4%ba%8b%e4%bb%b6%e6%89%a7%e8%a1%8c%e9%a1%ba%e5%ba%8f 事件执行顺序
  * @mixin \Swoole\Server
  */
-abstract class Server
+class Server
 {
     /**
      * @var \Illuminate\Events\Dispatcher
      */
-    protected $events;
+    private $events;
 
     /**
      * @var \Swoole\Server
      */
-    protected $swooleServer;
+    private $swooleServer;
 
     /**
-     * 在启动服务之前要执行的代码
-     *
-     * @var array
+     * @var string
      */
-    protected $loaders = [];
+    private $host;
 
     /**
-     * 在事件触发之前要执行的代码
-     *
-     * @var array
+     * @var int
      */
-    protected $bootstraps = [];
+    private $port;
 
     /**
-     * 在事件触发之后要执行的代码
-     *
-     * @var array
+     * @var int
      */
-    protected $cleaners = [];
+    private $mode;
+
+    /**
+     * @var int
+     */
+    private $sockType;
 
     /**
      * @param \Illuminate\Events\Dispatcher|null $events
@@ -61,15 +60,14 @@ abstract class Server
      * @param int $mode
      * @param int $sockType
      */
-    public function __construct($events = null, $host = '0.0.0.0')
+    public function __construct($host, $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP, $events = null)
     {
+        $this->host = $host;
+        $this->port = $port;
+        $this->mode = $mode;
+        $this->sockType = $sockType;
         $this->events = $events ?? app('events');
     }
-
-    /**
-     * @return \Swoole\Server
-     */
-    abstract public function createSwooleServer();
 
     /**
      * @return \Illuminate\Events\Dispatcher
@@ -80,12 +78,26 @@ abstract class Server
     }
 
     /**
+     * 创建一个 swoole server
+     *
+     * @param string $host
+     * @param int $port
+     * @param int $mode
+     * @param int $sockType
+     * @return \Swoole\Server
+     */
+    public static function create($host, $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
+    {
+        return new \Swoole\Server($host, $port, $mode, $sockType);
+    }
+
+    /**
      * @return \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public function swooleServer()
     {
         if(!$this->swooleServer) {
-            $this->swooleServer = $this->createSwooleServer();
+            $this->swooleServer = static::create($this->host, $this->port, $this->mode, $this->sockType);
         }
 
         return $this->swooleServer;
@@ -101,20 +113,22 @@ abstract class Server
     }
 
     /**
+     * 设置进程名称
+     * 仅仅是注册一个监听进程启动事件，在事件中设置进程名称
      *
      * @param string $prefix
      */
     public function setProcessName($prefix)
     {
-        $this->on(Start::class, function($server, Start $event) use($prefix) {
+        $this->on(Start::before, function($server, Start $event) use($prefix) {
             \swoole_set_process_name("{$prefix}master-{$event->server->master_pid}");
         });
 
-        $this->on(ManagerStart::class, function($server, ManagerStart $event) use($prefix) {
+        $this->on(ManagerStart::before, function($server, ManagerStart $event) use($prefix) {
             \swoole_set_process_name("{$prefix}manager-{$event->server->manager_pid}");
         });
 
-        $this->on(WorkerStart::class, function($server, WorkerStart $event) use($prefix) {
+        $this->on(WorkerStart::before, function($server, WorkerStart $event) use($prefix) {
             if($event->server->taskworker) {
                 \swoole_set_process_name("{$prefix}taskworker-{$event->server->worker_pid}-{$event->workerId}");
             } else {
@@ -124,43 +138,13 @@ abstract class Server
     }
 
     /**
-     * 注册事件引导器；在事件触发之前执行引导程序
-     *
      * @param string $eventName
-     * @param array $bootstraps
+     * @param  \Closure[]|string[]  $listener
      */
-    public function registerBootstraps($eventName, $bootstraps)
+    public function on($eventName, ...$callbacks)
     {
-        $this->bootstraps[$eventName] = array_merge($this->bootstraps[$eventName] ?? [], $bootstraps);
-    }
+        $eventClass = strpos($eventName, ':') > 0 ? explode(':', $eventName, 2)[0] : $eventName;
 
-    /**
-     * 注册事件清理器；在事件触发之后运行清理程序
-     *
-     * @param string $eventName
-     * @param array $bootstraps
-     */
-    public function registerCleaners($eventName, $cleaners)
-    {
-        $this->cleaners[$eventName] = array_merge($this->cleaners[$eventName] ?? [], $cleaners);
-    }
-
-    /**
-     * 注册服务加载器；在服务运行之前执行资源加载
-     *
-     * @param array $loaders
-     */
-    public function registerLoaders($loaders)
-    {
-        $this->loaders = array_merge($this->loaders ?? [], $loaders);
-    }
-
-    /**
-     * @param string $eventClass
-     * @param callable[] $callbacks
-     */
-    public function on($eventClass, ...$callbacks)
-    {
         if(!$this->events()->hasListeners($eventClass))
         {
             $this->registerSwooleServerEvent($eventClass);
@@ -177,74 +161,65 @@ abstract class Server
      */
     protected function registerSwooleServerEvent($eventClass)
     {
-        $this->swooleServer()->on($eventClass::SWOOLE_EVENT_NAME, function(...$arguments) use($eventClass){
+        $this->swooleServer()->on($eventClass::name, function(...$arguments) use($eventClass){
             $event = new $eventClass(...$arguments);
 
-            $this->onBefore($eventClass::SWOOLE_EVENT_NAME, $event);
+            $this->onBefore($eventClass, $event);
             $this->events()->dispatch($eventClass, [$this, $event]);
-            $this->onAfter($eventClass::SWOOLE_EVENT_NAME, $event);
+            $this->onAfter($eventClass, $event);
         });
     }
 
     /**
-     * @param string $eventName
-     * @param object $event
+     * @param string $eventClass
+     * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
      * @throws
      */
-    protected function onBefore($eventName, $event)
+    final protected function onBefore($eventClass, $event)
     {
-        // 调用事件引导器
+        // 内置 before
 
-        foreach($this->bootstraps[$eventName] ?? [] as $bootstrap)
-        {
-            \Flysion\Swoolaravel\call($bootstrap, [$this, $event], 'handle');
-        }
-
-        // 调用内置 before
-
-        $before = \Illuminate\Support\Str::camel("on_before_{$eventName}");
+        $before = \Illuminate\Support\Str::camel('on_before_' . $eventClass::name);
 
         if(method_exists($this, $before))
         {
             $this->$before($event);
         }
+
+        // 用户 before
+
+        $this->events()->dispatch($eventClass::before, $event);
     }
 
     /**
-     * @param string $eventName
-     * @param object $event
+     * @param string $eventClass
+     * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
      * @throws
      */
-    protected function onAfter($eventName, $event)
+    final protected function onAfter($eventClass, $event)
     {
-        // 调用内置 after
+        // 内置 after
 
-        $after = \Illuminate\Support\Str::camel("on_after_{$eventName}");
+        $after = \Illuminate\Support\Str::camel('on_after_' . $eventClass::name);
 
         if(method_exists($this, $after))
         {
             $this->$after($event);
         }
 
-        // 调用事件清理器
+        // 用户 after
 
-        foreach($this->cleaners[$eventName] ?? [] as $cleaner)
-        {
-            \Flysion\Swoolaravel\call($cleaner, [$this, $event], 'handle');
-        }
+        $this->events()->dispatch($eventClass::after, $event);
     }
 
     /**
      * @return mixed
      * @throws
      */
-    public function start()
+    public function start($setting = [])
     {
-        foreach($this->loaders as $loader)
-        {
-            \Flysion\Swoolaravel\call($loader, [$this], 'handle');
-        }
-
+        $this->events()->dispatch(\Flysion\Swoolaravel\Events\Ready::class);
+        $this->swooleServer()->set(array_merge($this->defaultSettings ?? [], $setting, $this->swooleServer()->setting ?? []));
         return $this->swooleServer()->start();
     }
 

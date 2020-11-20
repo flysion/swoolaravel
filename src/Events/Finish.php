@@ -11,9 +11,22 @@ namespace Flysion\Swoolaravel\Events;
  *
  * @link https://wiki.swoole.com/#/server/events?id=onfinish onFinish
  */
-class Finish
+class Finish implements SwooleEvent
 {
-    const SWOOLE_EVENT_NAME = 'finish';
+    /**
+     * 事件触发之前
+     */
+    const before = self::class . ':before';
+
+    /**
+     * 事件触发之后
+     */
+    const after = self::class . ':after';
+
+    /**
+     * swoole 事件名称
+     */
+    const name = 'finish';
 
     /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
