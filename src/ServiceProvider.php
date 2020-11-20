@@ -5,10 +5,10 @@ namespace Flysion\Swoolaravel;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
-class SwoolaravelServiceProvider extends ServiceProvider implements DeferrableProvider
+class ServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     protected $commands = [
-        \Flysion\Swoolaravel\Console\Commands\Start::class
+
     ];
 
     /**
@@ -37,7 +37,7 @@ class SwoolaravelServiceProvider extends ServiceProvider implements DeferrablePr
     public function provides()
     {
         return [
-            'swoolaravel:start'
+
         ];
     }
 }
