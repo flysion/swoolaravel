@@ -20,7 +20,7 @@ class RequestToLaravel
          * @var \Illuminate\Http\Response $response
          */
         $response = $kernel->handle(
-            $request = swoole_http_request_to_laravel_http_request($event->request)
+            $request = \Lee2son\Swoolaravel\swoole_http_request_to_laravel_http_request($event->request)
         );
 
         $headers = $response->headers->allPreserveCaseWithoutCookies();

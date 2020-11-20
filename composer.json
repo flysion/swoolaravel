@@ -1,5 +1,5 @@
 {
-  "name": "lee2son/swoole-laravel",
+  "name": "flysion/swoolaravel",
   "description": "使用 swoole 作为 webserver 来搭载 laravel 框架",
   "type": "library",
   "keywords": [
@@ -26,7 +26,7 @@
       "src/helpers.php"
     ],
     "psr-4": {
-      "Lee2son\\Swoolaravel\\": "src"
+      "Flysion\\Swoolaravel\\": "src"
     }
   },
   "autoload-dev": {
@@ -37,7 +37,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "Lee2son\\Swoolaravel\\SwoolaravelServiceProvider"
+        "Flysion\\Swoolaravel\\SwoolaravelServiceProvider"
       ],
       "aliases": {
 

@@ -17,9 +17,7 @@ class SwoolaravelServiceProvider extends ServiceProvider implements DeferrablePr
      */
     public function boot()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/server_options.php', 'server_options');
         $this->commands($this->commands);
-        $this->registerPublishes();
     }
 
     /**
@@ -29,20 +27,6 @@ class SwoolaravelServiceProvider extends ServiceProvider implements DeferrablePr
     public function register()
     {
 
-    }
-
-    /**
-     * 注册 publishes
-     * 通过“php artisan vendor:publish --tag=swoolaravel”命令把默认配置复制到相应目录去
-     *
-     * @return void
-     */
-    protected function registerPublishes()
-    {
-        $this->publishes([
-            __DIR__ . '/../config/swoolaravel.php' => base_path('config/swoolaravel.php'),
-            __DIR__ . '/../config/server_options.php' => base_path('config/server_options.php')
-        ], 'swoolaravel');
     }
 
     /**

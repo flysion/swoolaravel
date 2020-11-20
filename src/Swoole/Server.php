@@ -26,17 +26,7 @@ abstract class Server
     /**
      * @var \Illuminate\Events\Dispatcher
      */
-    protected $event;
-
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var \Illuminate\Config\Repository
-     */
-    protected $config;
+    protected $events;
 
     /**
      * @var \Swoole\Server
@@ -44,105 +34,68 @@ abstract class Server
     protected $swooleServer;
 
     /**
-     * @param array|string $config
-     * @param \Illuminate\Events\Dispatcher|null $event
+     * 在启动服务之前要执行的代码
+     *
+     * @var array
      */
-    public function __construct($config, $event = null)
-    {
-        $this->config = new \Illuminate\Config\Repository(is_string($config) ? config($config) : $config);
-        $this->event = $event ?? app('events');
-    }
+    protected $loaders = [];
 
     /**
-     * @return \Illuminate\Events\Dispatcher
+     * 在事件触发之前要执行的代码
+     *
+     * @var array
      */
-    public function event()
-    {
-        return $this->event;
-    }
+    protected $bootstraps = [];
 
     /**
-     * @return \Psr\Log\LoggerInterface
+     * 在事件触发之后要执行的代码
+     *
+     * @var array
      */
-    public function logger()
-    {
-        if(!$this->logger)
-        {
-            return $this->logger = \Illuminate\Support\Facades\Log::channel($this->config('log', \Illuminate\Support\Facades\Log::getDefaultDriver()));
-        }
+    protected $cleaners = [];
 
-        return $this->logger;
+    /**
+     * @param \Illuminate\Events\Dispatcher|null $events
+     * @param string $host
+     * @param int $port
+     * @param int $mode
+     * @param int $sockType
+     */
+    public function __construct($events = null, $host = '0.0.0.0')
+    {
+        $this->events = $events ?? app('events');
     }
 
     /**
      * @return \Swoole\Server
      */
+    abstract public function createSwooleServer();
+
+    /**
+     * @return \Illuminate\Events\Dispatcher
+     */
+    public function events()
+    {
+        return $this->events;
+    }
+
+    /**
+     * @return \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
+     */
     public function swooleServer()
     {
-        if(!$this->swooleServer)
-        {
-            $this->swooleServer = $this->createSwooleServer($this->config());
+        if(!$this->swooleServer) {
+            $this->swooleServer = $this->createSwooleServer();
         }
 
         return $this->swooleServer;
     }
 
     /**
-     * @param null $key
-     * @param null $default
-     * @return \Illuminate\Config\Repository|mixed
-     */
-    public function config($key = null, $default = null)
-    {
-        if(is_null($key))
-        {
-            return $this->config;
-        }
-
-        return $this->config->get($key, $default);
-    }
-
-    /**
-     * swoole 默认设置，优先级最高，无法被其他设置覆盖
-     *
-     * @return array
-     */
-    protected function defaultSetting()
-    {
-        return [
-            'task_enable_coroutine' => false,
-            'task_use_object' => false,
-        ];
-    }
-
-    /**
-     * @link https://wiki.swoole.com/#/learn?id=server%e7%9a%84%e4%b8%a4%e7%a7%8d%e8%bf%90%e8%a1%8c%e6%a8%a1%e5%bc%8f%e4%bb%8b%e7%bb%8d 两种运行模式介绍
-     * @param \Illuminate\Config\Repository $config
-     * @return \Swoole\Server
-     */
-    protected static function createSwooleServer($config)
-    {
-        return new \Swoole\Server(
-            $config->get('host') ?: '0.0.0.0',
-            $config->get('port') ?? 0,
-            $config->get('mode') ?? SWOOLE_PROCESS,
-            $config->get('sock_type') ?? SWOOLE_SOCK_TCP
-        );
-    }
-
-    /**
-     * 启用 HTTP 请求；必须在 start 之前调用
-     */
-    public function enableHttpRequest()
-    {
-        $this->swooleServer()->set(['open_http_protocol' => true]);
-    }
-
-    /**
      * 将 http 请求转发到 laravel 框架
      * 必须打开 swooler server 的 open_http_protocol 选项
      */
-    protected function httpRequestToLaravel()
+    public function enableHttpRequestToLaravel()
     {
         $this->on(\Lee2son\Swoolaravel\Events\Request::class, \Lee2son\Swoolaravel\Listeners\RequestToLaravel::class);
     }
@@ -151,99 +104,100 @@ abstract class Server
      *
      * @param string $prefix
      */
-    protected function setProcessName($prefix)
+    public function setProcessName($prefix)
     {
         $this->on(Start::class, function($server, Start $event) use($prefix) {
-            swoole_set_process_name("{$prefix}master-{$event->server->master_pid}");
+            \swoole_set_process_name("{$prefix}master-{$event->server->master_pid}");
         });
 
         $this->on(ManagerStart::class, function($server, ManagerStart $event) use($prefix) {
-            swoole_set_process_name("{$prefix}manager-{$event->server->manager_pid}");
+            \swoole_set_process_name("{$prefix}manager-{$event->server->manager_pid}");
         });
 
         $this->on(WorkerStart::class, function($server, WorkerStart $event) use($prefix) {
             if($event->server->taskworker) {
-                swoole_set_process_name("{$prefix}taskworker-{$event->server->worker_pid}-{$event->workerId}");
+                \swoole_set_process_name("{$prefix}taskworker-{$event->server->worker_pid}-{$event->workerId}");
             } else {
-                swoole_set_process_name("{$prefix}worker-{$event->server->worker_pid}-{$event->workerId}");
+                \swoole_set_process_name("{$prefix}worker-{$event->server->worker_pid}-{$event->workerId}");
             }
         });
     }
 
     /**
-     * 注册事件引导器
+     * 注册事件引导器；在事件触发之前执行引导程序
      *
-     * @param $eventName
-     * @param $bootstraps
+     * @param string $eventName
+     * @param array $bootstraps
      */
     public function registerBootstraps($eventName, $bootstraps)
     {
-        foreach($bootstraps as $bootstrap)
-        {
-            app()->singleton($bootstrap);
-        }
-
-        app()->tag($bootstraps, "bootstraps.{$eventName}");
+        $this->bootstraps[$eventName] = array_merge($this->bootstraps[$eventName] ?? [], $bootstraps);
     }
 
     /**
-     * 注册事件清理器
+     * 注册事件清理器；在事件触发之后运行清理程序
      *
-     * @param $eventName
-     * @param $bootstraps
+     * @param string $eventName
+     * @param array $bootstraps
      */
     public function registerCleaners($eventName, $cleaners)
     {
-        foreach($cleaners as $cleaner)
-        {
-            app()->singleton($cleaner);
-        }
-
-        app()->tag($cleaners, "cleaners.{$eventName}");
+        $this->cleaners[$eventName] = array_merge($this->cleaners[$eventName] ?? [], $cleaners);
     }
 
     /**
-     * @param string $event
+     * 注册服务加载器；在服务运行之前执行资源加载
+     *
+     * @param array $loaders
+     */
+    public function registerLoaders($loaders)
+    {
+        $this->loaders = array_merge($this->loaders ?? [], $loaders);
+    }
+
+    /**
+     * @param string $eventClass
      * @param callable[] $callbacks
      */
-    public function on($event, ...$callbacks)
+    public function on($eventClass, ...$callbacks)
     {
-        if(!$this->event()->hasListeners($event))
+        if(!$this->events()->hasListeners($eventClass))
         {
-            $this->registerSwooleServerEvent($event);
+            $this->registerSwooleServerEvent($eventClass);
         }
 
         foreach($callbacks as $callback)
         {
-            $this->event->listen($event, $callback);
+            $this->events()->listen($eventClass, $callback);
         }
     }
 
     /**
-     * @param $event
+     * @param string $eventClass
      */
-    protected function registerSwooleServerEvent($event)
+    protected function registerSwooleServerEvent($eventClass)
     {
-        $this->swooleServer()->on($event::SWOOLE_EVENT_NAME, function(...$arguments) use($event){
-            $eventObject = new $event(...$arguments);
+        $this->swooleServer()->on($eventClass::SWOOLE_EVENT_NAME, function(...$arguments) use($eventClass){
+            $event = new $eventClass(...$arguments);
 
-            $this->onBefore($event::SWOOLE_EVENT_NAME, $eventObject);
-            $this->event()->dispatch($event, [$this, $eventObject]);
-            $this->onAfter($event::SWOOLE_EVENT_NAME, $eventObject);
+            $this->onBefore($eventClass::SWOOLE_EVENT_NAME, $event);
+            $this->events()->dispatch($eventClass, [$this, $event]);
+            $this->onAfter($eventClass::SWOOLE_EVENT_NAME, $event);
         });
     }
 
     /**
      * @param string $eventName
      * @param object $event
+     * @throws
      */
     protected function onBefore($eventName, $event)
     {
         // 调用事件引导器
 
-        foreach(app()->tagged("bootstraps.{$eventName}") as $bootstrap)
+        foreach($this->bootstraps[$eventName] ?? [] as $bootstrap)
         {
-            $bootstrap->handle($this);
+            \Lee2son\Swoolaravel\call($bootstrap, [$this, $event], 'handle');
         }
 
         // 调用内置 before
@@ -259,10 +213,12 @@ abstract class Server
     /**
      * @param string $eventName
      * @param object $event
+     * @throws
      */
     protected function onAfter($eventName, $event)
     {
         // 调用内置 after
+
         $after = \Illuminate\Support\Str::camel("on_after_{$eventName}");
 
         if(method_exists($this, $after))
@@ -272,63 +228,24 @@ abstract class Server
 
         // 调用事件清理器
 
-        foreach(app()->tagged("cleaners.{$eventName}") as $cleaner)
+        foreach($this->cleaners[$eventName] ?? [] as $cleaner)
         {
-            $cleaner->handle($this);
+            \Lee2son\Swoolaravel\call($cleaner, [$this, $event], 'handle');
         }
     }
 
     /**
      * @return mixed
+     * @throws
      */
     public function start()
     {
-        $this->swooleServer()->set(array_merge($this->config('setting', []), $this->defaultSetting()));
-
-        // 设置进程名称前缀
-
-        if($prefix = $this->config('process_name_prefix'))
+        foreach($this->loaders as $loader)
         {
-            $this->setProcessName($prefix);
-        }
-
-        // 启用 http request
-
-        $this->config('setting.open_http_protocol') && $this->httpRequestToLaravel();
-
-        // 注册事件引导
-
-        foreach($this->config('bootstraps', []) as $eventName => $bootstraps)
-        {
-            $this->registerBootstraps($eventName, $bootstraps);
-        }
-
-        // 注册事件清理器
-
-        foreach($this->config('cleaners', []) as $eventName => $cleaners)
-        {
-            $this->registerCleaners($eventName, $cleaners);
-        }
-
-        // 调用装载器对环境进行装载
-
-        foreach($this->config('loaders', []) as $loader)
-        {
-            (new $loader)->handle($this);
+            \Lee2son\Swoolaravel\call($loader, [$this], 'handle');
         }
 
         return $this->swooleServer()->start();
-    }
-
-    /**
-     * 配置设置
-     *
-     * @param string $key
-     * @param mixed $value
-     */
-    public function set($key, $value)
-    {
-        $this->config()->set($key, $value);
     }
 
     /**
