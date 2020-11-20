@@ -1,6 +1,6 @@
 <?php
 
-namespace Lee2son\Swoolaravel\Events;
+namespace Flysion\Swoolaravel\Events;
 
 /**
  * 接收到 UDP 数据包时回调此函数，发生在 worker 进程中。

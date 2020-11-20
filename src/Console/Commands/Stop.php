@@ -1,5 +1,5 @@
 <?php
-namespace Lee2son\Swoolaravel\Console\Commands;
+namespace Flysion\Swoolaravel\Console\Commands;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;

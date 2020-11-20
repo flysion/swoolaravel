@@ -1,4 +1,4 @@
-<?php namespace Lee2son\Swoolaravel;
+<?php namespace Flysion\Swoolaravel;
 
 use Illuminate\Config\Repository;
 

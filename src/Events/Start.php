@@ -1,6 +1,6 @@
 <?php
 
-namespace Lee2son\Swoolaravel\Events;
+namespace Flysion\Swoolaravel\Events;
 
 /**
  * 启动后在主进程（master）的主线程回调此函数【主进程】

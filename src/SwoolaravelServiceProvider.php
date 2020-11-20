@@ -1,6 +1,6 @@
 <?php 
 
-namespace Lee2son\Swoolaravel;
+namespace Flysion\Swoolaravel;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
@@ -8,7 +8,7 @@ use Illuminate\Support\ServiceProvider;
 class SwoolaravelServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     protected $commands = [
-        \Lee2son\Swoolaravel\Console\Commands\Start::class
+        \Flysion\Swoolaravel\Console\Commands\Start::class
     ];
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Lee2son\Swoolaravel\Events;
+namespace Flysion\Swoolaravel\Events;
 
 /**
  * 当工作进程收到由 $server->sendMessage() 发送的 unixSocket 消息时会触发 onPipeMessage 事件。worker/task 进程都可能会触发 onPipeMessage 事件

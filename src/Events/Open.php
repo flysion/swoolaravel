@@ -1,6 +1,6 @@
 <?php
 
-namespace Lee2son\Swoolaravel\Events;
+namespace Flysion\Swoolaravel\Events;
 
 /**
  * 当 WebSocket 客户端与服务器建立连接并完成握手后会回调此函数。

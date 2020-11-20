@@ -1,6 +1,6 @@
 <?php
 
-namespace Lee2son\Swoolaravel\Events;
+namespace Flysion\Swoolaravel\Events;
 
 /**
  * 此事件在 Server 正常结束时发生【主进程】

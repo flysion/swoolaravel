@@ -1,6 +1,6 @@
 <?php
 
-namespace Lee2son\Swoolaravel\Swoole\Http;
+namespace Flysion\Swoolaravel\Swoole\Http;
 
 /**
  * 注意：
@@ -11,7 +11,7 @@ namespace Lee2son\Swoolaravel\Swoole\Http;
  * @link https://wiki.swoole.com/#/http_server
  * @mixin \Swoole\Http\Server
  */
-class Server extends \Lee2son\Swoolaravel\Swoole\Server
+class Server extends \Flysion\Swoolaravel\Swoole\Server
 {
     /**
      * @param \Illuminate\Config\Repository $config

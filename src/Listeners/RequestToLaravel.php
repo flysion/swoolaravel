@@ -1,15 +1,15 @@
 <?php
 
-namespace Lee2son\Swoolaravel\Listeners;
+namespace Flysion\Swoolaravel\Listeners;
 
 class RequestToLaravel
 {
     /**
-     * @param \Lee2son\Swoolaravel\Swoole\Http\Server|\Lee2son\Swoolaravel\Swoole\WebSocket\Server $server
-     * @param \Lee2son\Swoolaravel\Events\Request $event
+     * @param \Flysion\Swoolaravel\Swoole\Http\Server|\Flysion\Swoolaravel\Swoole\WebSocket\Server $server
+     * @param \Flysion\Swoolaravel\Events\Request $event
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function handle($server, \Lee2son\Swoolaravel\Events\Request $event)
+    public function handle($server, \Flysion\Swoolaravel\Events\Request $event)
     {
         /**
          * @var \Illuminate\Foundation\Http\Kernel $kernel
@@ -20,7 +20,7 @@ class RequestToLaravel
          * @var \Illuminate\Http\Response $response
          */
         $response = $kernel->handle(
-            $request = \Lee2son\Swoolaravel\swoole_http_request_to_laravel_http_request($event->request)
+            $request = \Flysion\Swoolaravel\swoole_http_request_to_laravel_http_request($event->request)
         );
 
         $headers = $response->headers->allPreserveCaseWithoutCookies();

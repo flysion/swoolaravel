@@ -1,6 +1,6 @@
 <?php
 
-namespace Lee2son\Swoolaravel;
+namespace Flysion\Swoolaravel;
 
 /**
  * \Swooler\Http\Request to \Illuminate\Http\Request

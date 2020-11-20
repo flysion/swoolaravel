@@ -3,7 +3,7 @@ return [
     'server' => [
         /**
          * 启动器
-         * @see \Lee2son\Swoolaravel\Launcher
+         * @see \Flysion\Swoolaravel\Launcher
          */
         'launcher' => null,
 
@@ -51,7 +51,7 @@ return [
 
         /**
          * 装载器（在 start 服务之前调用）
-         * @see \Lee2son\Swoolaravel\Loaders\LoaderInterface
+         * @see \Flysion\Swoolaravel\Loaders\LoaderInterface
          */
         'loaders' => [
 
@@ -59,7 +59,7 @@ return [
 
         /**
          * 事件引导器（在事件处理之前调用）
-         * @see \Lee2son\Swoolaravel\Bootstraps\BootstrapInterface
+         * @see \Flysion\Swoolaravel\Bootstraps\BootstrapInterface
          */
         'bootstraps' => [
 
@@ -68,7 +68,7 @@ return [
         /**
          * 事件清理器（在事件处理完毕之后调用）；可对当前进程空间进行清理
          * 在每一次进程处理完毕后使用 memory_get_usage() 记录内存是否比上一次多来判断是否有内存未释放
-         * @see \Lee2son\Swoolaravel\Bootstraps\BootstrapInterface
+         * @see \Flysion\Swoolaravel\Bootstraps\BootstrapInterface
          */
         'cleaners' => [
             'task' => [
@@ -92,7 +92,7 @@ return [
     'http_server' => [
         /**
          * 启动器
-         * @see \Lee2son\Swoolaravel\Launcher
+         * @see \Flysion\Swoolaravel\Launcher
          */
         'launcher' => null,
 
@@ -120,7 +120,7 @@ return [
 
         /**
          * 装载器（在 start 服务之前调用）
-         * @see \Lee2son\Swoolaravel\Loaders\LoaderInterface
+         * @see \Flysion\Swoolaravel\Loaders\LoaderInterface
          */
         'loaders' => [
 
@@ -128,7 +128,7 @@ return [
 
         /**
          * 事件引导器（在事件处理之前调用）
-         * @see \Lee2son\Swoolaravel\Bootstraps\BootstrapInterface
+         * @see \Flysion\Swoolaravel\Bootstraps\BootstrapInterface
          */
         'bootstraps' => [
 
@@ -137,7 +137,7 @@ return [
         /**
          * 事件清理器（在事件处理完毕之后调用）；可对当前进程空间进行清理
          * 在每一次进程处理完毕后使用 memory_get_usage() 记录内存是否比上一次多来判断是否有内存未释放
-         * @see \Lee2son\Swoolaravel\Bootstraps\BootstrapInterface
+         * @see \Flysion\Swoolaravel\Bootstraps\BootstrapInterface
          */
         'cleaners' => [
             'task' => [
@@ -164,7 +164,7 @@ return [
     'websocket_server' => [
         /**
          * 启动器
-         * @see \Lee2son\Swoolaravel\Launcher
+         * @see \Flysion\Swoolaravel\Launcher
          */
         'launcher' => null,
 
@@ -192,7 +192,7 @@ return [
 
         /**
          * 装载器（在 start 服务之前调用）
-         * @see \Lee2son\Swoolaravel\Loaders\LoaderInterface
+         * @see \Flysion\Swoolaravel\Loaders\LoaderInterface
          */
         'loaders' => [
 
@@ -200,7 +200,7 @@ return [
 
         /**
          * 事件引导器（在事件处理之前调用）
-         * @see \Lee2son\Swoolaravel\Bootstraps\BootstrapInterface
+         * @see \Flysion\Swoolaravel\Bootstraps\BootstrapInterface
          */
         'bootstraps' => [
 
@@ -209,7 +209,7 @@ return [
         /**
          * 事件清理器（在事件处理完毕之后调用）；可对当前进程空间进行清理
          * 在每一次进程处理完毕后使用 memory_get_usage() 记录内存是否比上一次多来判断是否有内存未释放
-         * @see \Lee2son\Swoolaravel\Bootstraps\BootstrapInterface
+         * @see \Flysion\Swoolaravel\Bootstraps\BootstrapInterface
          */
         'cleaners' => [
             'task' => [

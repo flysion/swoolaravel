@@ -1,6 +1,6 @@
 <?php
 
-namespace Lee2son\Swoolaravel\Exceptions;
+namespace Flysion\Swoolaravel\Exceptions;
 
 class Exception extends \Exception
 {

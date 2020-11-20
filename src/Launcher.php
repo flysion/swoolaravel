@@ -1,12 +1,12 @@
 <?php
 
-namespace Lee2son\Swoolaravel;
+namespace Flysion\Swoolaravel;
 
 abstract class Launcher
 {
     /**
      * @param array $config
-     * @return \Lee2son\Swoolaravel\Swoole\Server|\Lee2son\Swoolaravel\Swoole\Http\Server|\Lee2son\Swoolaravel\Swoole\WebSocket\Server $server
+     * @return \Flysion\Swoolaravel\Swoole\Server|\Flysion\Swoolaravel\Swoole\Http\Server|\Flysion\Swoolaravel\Swoole\WebSocket\Server $server
      */
     abstract protected function createServer($config);
 

@@ -1,5 +1,5 @@
 <?php
-namespace Lee2son\Swoolaravel\Console\Commands;
+namespace Flysion\Swoolaravel\Console\Commands;
 
 class Start extends \Illuminate\Console\Command
 {

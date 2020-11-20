@@ -1,4 +1,4 @@
 <?php
 /**
- * @var $this Lee2son\Swoolaravel\SwoolaravelServiceProvider
+ * @var $this Flysion\Swoolaravel\SwoolaravelServiceProvider
  */

@@ -1,12 +1,12 @@
 <?php
 
-namespace Lee2son\Swoolaravel\Swoole\WebSocket;
+namespace Flysion\Swoolaravel\Swoole\WebSocket;
 
 /**
  * @link https://wiki.swoole.com/#/websocket_server
  * @mixin \Swoole\WebSocket\Server
  */
-class Server extends \Lee2son\Swoolaravel\Swoole\Http\Server
+class Server extends \Flysion\Swoolaravel\Swoole\Http\Server
 {
     /**
      * @param \Illuminate\Config\Repository $config

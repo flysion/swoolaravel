@@ -1,6 +1,6 @@
 <?php
 
-namespace Lee2son\Swoolaravel\Events;
+namespace Flysion\Swoolaravel\Events;
 
 /**
  * 此事件在 Worker 进程终止时发生。在此函数中可以回收 Worker 进程申请的各类资源。【Worker进程】

@@ -1,6 +1,6 @@
 <?php
 
-namespace Lee2son\Swoolaravel\Events;
+namespace Flysion\Swoolaravel\Events;
 
 /**
  * 当 Worker/Task 进程发生异常后会在 Manager 进程内回调此函数。
