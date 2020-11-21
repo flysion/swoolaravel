@@ -19,6 +19,6 @@ class Server extends \Flysion\Swoolaravel\Swoole\Http\Server
      */
     public static function create($host, $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
     {
-        return new \Swoole\WebSocket\Server($host, $port, $mode, $sockType);
+        return new \Swoole\WebSocket\Server($host, $port);
     }
 }

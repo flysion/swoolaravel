@@ -3,9 +3,8 @@
 namespace Flysion\Swoolaravel;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
-use Illuminate\Support\ServiceProvider;
 
-class ServiceProvider extends ServiceProvider implements DeferrableProvider
+class ServiceProvider extends \Illuminate\Support\ServiceProvider implements DeferrableProvider
 {
     protected $commands = [
 

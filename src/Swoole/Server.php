@@ -138,35 +138,40 @@ class Server
     }
 
     /**
-     * @param string $eventName
-     * @param  \Closure[]|string[]  $listener
+     * @param string $name
+     * @param  \Closure[]|string[]  $listeners
      */
-    public function on($eventName, ...$callbacks)
+    public function on($name, ...$listeners)
     {
-        $eventClass = strpos($eventName, ':') > 0 ? explode(':', $eventName, 2)[0] : $eventName;
+        $class = strpos($name, ':') > 0 ? explode(':', $name, 2)[0] : $name;
 
-        if(!$this->events()->hasListeners($eventClass))
+        if (\Illuminate\Support\Str::startsWith($class, 'Flysion\Swoolaravel\Events'))
         {
-            $this->registerSwooleServerEvent($eventClass);
+            $ref = new \ReflectionClass($class);
+
+            if($ref->implementsInterface(\Flysion\Swoolaravel\Events\SwooleEvent::class) && !$this->events()->hasListeners($class))
+            {
+                $this->registerSwooleServerEvent($class);
+            }
         }
 
-        foreach($callbacks as $callback)
+        foreach($listeners as $listener)
         {
-            $this->events()->listen($eventClass, $callback);
+            $this->events()->listen($class, $listener);
         }
     }
 
     /**
-     * @param string $eventClass
+     * @param string $class
      */
-    protected function registerSwooleServerEvent($eventClass)
+    protected function registerSwooleServerEvent($class)
     {
-        $this->swooleServer()->on($eventClass::name, function(...$arguments) use($eventClass){
-            $event = new $eventClass(...$arguments);
+        $this->swooleServer()->on($class::name, function(...$arguments) use($class) {
+            $event = new $class(...$arguments);
 
-            $this->onBefore($eventClass, $event);
-            $this->events()->dispatch($eventClass, [$this, $event]);
-            $this->onAfter($eventClass, $event);
+            $this->onBefore($class, $event);
+            $this->events()->dispatch($class, [$this, $event]);
+            $this->onAfter($class, $event);
         });
     }
 
@@ -175,11 +180,11 @@ class Server
      * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
      * @throws
      */
-    final protected function onBefore($eventClass, $event)
+    final protected function onBefore($class, $event)
     {
         // 内置 before
 
-        $before = \Illuminate\Support\Str::camel('on_before_' . $eventClass::name);
+        $before = \Illuminate\Support\Str::camel('on_before_' . $class::name);
 
         if(method_exists($this, $before))
         {
@@ -188,7 +193,7 @@ class Server
 
         // 用户 before
 
-        $this->events()->dispatch($eventClass::before, $event);
+        $this->events()->dispatch($class::before, $event);
     }
 
     /**
@@ -196,11 +201,11 @@ class Server
      * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
      * @throws
      */
-    final protected function onAfter($eventClass, $event)
+    final protected function onAfter($class, $event)
     {
         // 内置 after
 
-        $after = \Illuminate\Support\Str::camel('on_after_' . $eventClass::name);
+        $after = \Illuminate\Support\Str::camel('on_after_' . $class::name);
 
         if(method_exists($this, $after))
         {
@@ -209,7 +214,7 @@ class Server
 
         // 用户 after
 
-        $this->events()->dispatch($eventClass::after, $event);
+        $this->events()->dispatch($class::after, $event);
     }
 
     /**
@@ -218,8 +223,17 @@ class Server
      */
     public function start($setting = [])
     {
-        $this->events()->dispatch(\Flysion\Swoolaravel\Events\Ready::class);
-        $this->swooleServer()->set(array_merge($this->defaultSettings ?? [], $setting, $this->swooleServer()->setting ?? []));
+        $this->events()->dispatch(\Flysion\Swoolaravel\Events\Ready::class, [$this]);
+
+        $this->swooleServer()->set(array_merge(
+            $this->defaultSettings ?? [],
+            $setting,
+            $this->swooleServer()->setting ?? [],
+            [
+                'task_use_object' => false
+            ]
+        ));
+
         return $this->swooleServer()->start();
     }
 
