@@ -8,7 +8,7 @@ namespace Flysion\Swoolaravel;
  * @param \Swoole\Http\Request $request
  * @return \Illuminate\Http\Request
  */
-function swoole_http_request_to_laravel_http_request(\Swoole\Http\Request $request) : \Illuminate\Http\Request
+function swoole_request_to_laravel_request(\Swoole\Http\Request $request) : \Illuminate\Http\Request
 {
     $server = $_SERVER;
     foreach($request->header as $k => $v)

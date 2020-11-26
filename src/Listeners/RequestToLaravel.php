@@ -20,7 +20,7 @@ class RequestToLaravel
          * @var \Illuminate\Http\Response $response
          */
         $response = $kernel->handle(
-            $request = \Flysion\Swoolaravel\swoole_http_request_to_laravel_http_request($event->request)
+            $request = \Flysion\Swoolaravel\swoole_request_to_laravel_request($event->request)
         );
 
         $headers = $response->headers->allPreserveCaseWithoutCookies();

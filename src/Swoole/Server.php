@@ -5,6 +5,7 @@ namespace Flysion\Swoolaravel\Swoole;
 use Flysion\Swoolaravel\Events\ManagerStart;
 use Flysion\Swoolaravel\Events\Start;
 use Flysion\Swoolaravel\Events\WorkerStart;
+use Illuminate\Support\Env;
 
 /**
  * 事件执行顺序：
@@ -222,7 +223,7 @@ class Server
      * @throws
      */
     public function start($setting = [])
-    {
+        {
         $this->events()->dispatch(\Flysion\Swoolaravel\Events\Ready::class, [$this]);
 
         $this->swooleServer()->set(array_merge(
@@ -233,6 +234,8 @@ class Server
                 'task_use_object' => false
             ]
         ));
+
+        putenv('APP_RUNNING_IN_SWOOLE=TRUE');
 
         return $this->swooleServer()->start();
     }
