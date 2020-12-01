@@ -25,6 +25,11 @@ use Illuminate\Support\Env;
 class Server
 {
     /**
+     * @var array swoole server 默认配置
+     */
+    protected $defaultSettings = [];
+
+    /**
      * @var \Illuminate\Events\Dispatcher
      */
     private $events;
@@ -110,6 +115,7 @@ class Server
      */
     public function enableHttpRequestToLaravel()
     {
+        $this->swooleServer()->set(['open_http_protocol' => true]);
         $this->on(\Flysion\Swoolaravel\Events\Request::class, \Flysion\Swoolaravel\Listeners\RequestToLaravel::class);
     }
 
@@ -223,11 +229,11 @@ class Server
      * @throws
      */
     public function start($setting = [])
-        {
+    {
         $this->events()->dispatch(\Flysion\Swoolaravel\Events\Ready::class, [$this]);
 
         $this->swooleServer()->set(array_merge(
-            $this->defaultSettings ?? [],
+            $this->defaultSettings,
             $setting,
             $this->swooleServer()->setting ?? [],
             [
@@ -236,8 +242,10 @@ class Server
         ));
 
         putenv('APP_RUNNING_IN_SWOOLE=TRUE');
+        $result = $this->swooleServer()->start();
+        putenv('APP_RUNNING_IN_SWOOLE=FALSE');
 
-        return $this->swooleServer()->start();
+        return $result;
     }
 
     /**
