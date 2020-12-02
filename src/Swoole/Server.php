@@ -147,6 +147,7 @@ class Server
     /**
      * @param string $name
      * @param  \Closure[]|string[]  $listeners
+     * @throws
      */
     public function on($name, ...$listeners)
     {
