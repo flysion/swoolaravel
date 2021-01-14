@@ -35,8 +35,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider implements Def
      */
     public function provides()
     {
-        return [
-
-        ];
+        return [];
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Flysion\Swoolaravel\Swoole\WebSocket;
 
+use phpDocumentor\Reflection\Types\Parent_;
+
 /**
  * @link https://wiki.swoole.com/#/websocket_server
  * @mixin \Swoole\WebSocket\Server
@@ -9,16 +11,19 @@ namespace Flysion\Swoolaravel\Swoole\WebSocket;
 class Server extends \Flysion\Swoolaravel\Swoole\Http\Server
 {
     /**
-     * 创建一个 swoole server
-     *
      * @param string $host
      * @param int $port
-     * @param int $mode
-     * @param int $sockType
-     * @return \Swoole\Server
      */
-    public static function create($host, $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
+    public function __construct($host, $port = 0)
     {
-        return new \Swoole\WebSocket\Server($host, $port);
+        parent::__construct($host, $port);
+    }
+
+    /**
+     * @return \Swoole\WebSocket\Server
+     */
+    protected function createSwooleServer()
+    {
+        return new \Swoole\WebSocket\Server($this->host, $this->port);
     }
 }
