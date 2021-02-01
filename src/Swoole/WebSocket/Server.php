@@ -2,8 +2,6 @@
 
 namespace Flysion\Swoolaravel\Swoole\WebSocket;
 
-use phpDocumentor\Reflection\Types\Parent_;
-
 /**
  * @link https://wiki.swoole.com/#/websocket_server
  * @mixin \Swoole\WebSocket\Server
@@ -11,12 +9,13 @@ use phpDocumentor\Reflection\Types\Parent_;
 class Server extends \Flysion\Swoolaravel\Swoole\Http\Server
 {
     /**
+     * @param mixed $payload 透传参数，没有什么用处，开发者自己只有发挥
      * @param string $host
      * @param int $port
      */
-    public function __construct($host, $port = 0)
+    public function __construct($payload, $host, $port = 0)
     {
-        parent::__construct($host, $port);
+        parent::__construct($payload, $host, $port);
     }
 
     /**

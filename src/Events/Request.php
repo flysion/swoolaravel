@@ -51,7 +51,7 @@ class Request implements SwooleEvent
     /**
      * @param \Swoole\Http\Request $request
      * @param \Swoole\Http\Response $response
-     * */
+     */
     public function __construct($request, $response)
     {
         $this->request = $request;

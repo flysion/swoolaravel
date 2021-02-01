@@ -34,6 +34,11 @@ class Server
     private $swooleServer;
 
     /**
+     * @var mixed
+     */
+    public $payload;
+
+    /**
      * @var string
      */
     protected $host;
@@ -54,17 +59,25 @@ class Server
     protected $sockType;
 
     /**
+     * @var string
+     */
+    public $serverUuid;
+
+    /**
+     * @param mixed $payload 透传参数，没有什么用处，开发者自己只有发挥
      * @param string $host
      * @param int $port
      * @param int $mode
      * @param int $sockType
      */
-    public function __construct($host, $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
+    public function __construct($payload, $host, $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
     {
+        $this->payload = $payload;
         $this->host = $host;
         $this->port = $port;
         $this->mode = $mode;
         $this->sockType = $sockType;
+        $this->serverUuid = md5(uniqid());
     }
 
     /**
@@ -115,7 +128,7 @@ class Server
      *
      * @param string $prefix
      */
-    public function setProcessName($prefix)
+    public function setProcessNamePrefix($prefix)
     {
         $this->on(Start::before, function($server, Start $event) use($prefix) {
             \swoole_set_process_name("{$prefix}master-{$event->server->master_pid}");
@@ -171,6 +184,19 @@ class Server
             $this->dispatcher()->dispatch($class, [$this, $event]);
             $this->onAfter($class, $event);
         });
+    }
+
+    /**
+     * @param WorkerStart $event
+     */
+    final protected function onBeforeWorkerStart(\Flysion\Swoolaravel\Events\WorkerStart $event)
+    {
+        $app = require base_path('/bootstrap/app.php');
+
+        $consoleKernel = $app->make(\Illuminate\Contracts\Console\Kernel::class);
+        $consoleKernel->bootstrap();
+
+        \Illuminate\Container\Container::setInstance($app);
     }
 
     /**
@@ -233,6 +259,8 @@ class Server
     }
 
     /**
+     * proxy to swoole server.
+     *
      * @param string $name
      * @param array $arguments
      * @return mixed
@@ -240,5 +268,16 @@ class Server
     public function __call($name, $arguments)
     {
         return $this->swooleServer()->$name(...$arguments);
+    }
+
+    /**
+     * proxy to swoole server.
+     *
+     * @param $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->swooleServer()->{$name};
     }
 }
