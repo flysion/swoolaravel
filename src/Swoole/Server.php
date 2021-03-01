@@ -197,6 +197,8 @@ class Server
         $consoleKernel->bootstrap();
 
         \Illuminate\Container\Container::setInstance($app);
+
+        app()->instance('server', $this);
     }
 
     /**
