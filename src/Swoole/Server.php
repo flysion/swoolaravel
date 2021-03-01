@@ -198,7 +198,7 @@ class Server
 
         \Illuminate\Container\Container::setInstance($app);
 
-        app()->instance('server', $this);
+        $app->instance('server', $this);
     }
 
     /**
