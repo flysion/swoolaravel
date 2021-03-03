@@ -180,7 +180,10 @@ class Server
         $this->swooleServer()->on($class::name, function(...$arguments) use($class) {
             $event = new $class(...$arguments);
 
-            $this->onBefore($class, $event);
+            if($this->onBefore($class, $event) === false) {
+                return;
+            }
+
             $this->dispatcher()->dispatch($class, [$this, $event]);
             $this->onAfter($class, $event);
         });
@@ -198,12 +201,13 @@ class Server
 
         \Illuminate\Container\Container::setInstance($app);
 
-        app()->instance('server', $this);
+        $app->instance('server', $this);
     }
 
     /**
      * @param string $eventClass
      * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
+     * @return false|null
      * @throws
      */
     final protected function onBefore($class, $event)
@@ -214,7 +218,9 @@ class Server
 
         if(method_exists($this, $before))
         {
-            $this->$before($event);
+            if($this->{$before}($event) === false) {
+                return false;
+            }
         }
 
         // 用户 before
@@ -235,7 +241,7 @@ class Server
 
         if(method_exists($this, $after))
         {
-            $this->$after($event);
+            $this->{$after}($event);
         }
 
         // 用户 after
