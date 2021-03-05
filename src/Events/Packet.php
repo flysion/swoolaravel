@@ -12,18 +12,8 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/server/events?id=onpacket onPacket
  * @link https://wiki.swoole.com/#/start/start_udp_server UDP 服务器
  */
-class Packet implements SwooleEvent
+class Packet
 {
-    /**
-     * 事件触发之前
-     */
-    const before = self::class . ':before';
-
-    /**
-     * 事件触发之后
-     */
-    const after = self::class . ':after';
-
     /**
      * swoole 事件名称
      */

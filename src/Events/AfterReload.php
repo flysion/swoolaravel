@@ -7,18 +7,8 @@ namespace Flysion\Swoolaravel\Events;
  *
  * @link https://wiki.swoole.com/#/server/events?id=onafterreload
  */
-class AfterReload implements SwooleEvent
+class AfterReload
 {
-    /**
-     * 事件触发之前
-     */
-    const before = self::class . ':before';
-
-    /**
-     * 事件触发之后
-     */
-    const after = self::class . ':after';
-
     /**
      * swoole 事件名称
      */

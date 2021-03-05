@@ -14,20 +14,24 @@ namespace Flysion\Swoolaravel\Swoole\Http;
 class Server extends \Flysion\Swoolaravel\Swoole\Server
 {
     /**
-     * @param mixed $payload 透传参数，没有什么用处，开发者自己只有发挥
+     * @param \Illuminate\Events\Dispatcher|null $events
      * @param string $host
      * @param int $port
      */
-    public function __construct($payload, $host, $port = 0)
+    public function __construct($events, $host, $port = 0)
     {
-        parent::__construct($payload, $host, $port);
+        parent::__construct($events, $host, $port);
     }
 
     /**
-     * @return \Swoole\Http\Server
+     * @param string $host
+     * @param int $port
+     * @param int $mode
+     * @param int $sockType
+     * @return \Swoole\Server
      */
-    protected function createSwooleServer()
+    protected function createSwooleServer($host, $port, $mode, $sockType)
     {
-        return new \Swoole\Http\Server($this->host, $this->port);
+        return new \Swoole\Http\Server($host, $port);
     }
 }

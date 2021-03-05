@@ -26,90 +26,44 @@ class Server
     /**
      * @var \Illuminate\Events\Dispatcher
      */
-    private $dispatcher;
+    public $events;
 
     /**
      * @var \Swoole\Server
      */
-    private $swooleServer;
+    public $swooleServer;
 
     /**
-     * @var mixed
-     */
-    public $payload;
-
-    /**
-     * @var string
-     */
-    protected $host;
-
-    /**
-     * @var int
-     */
-    protected $port;
-
-    /**
-     * @var int
-     */
-    protected $mode;
-
-    /**
-     * @var int
-     */
-    protected $sockType;
-
-    /**
-     * @var string
-     */
-    public $serverUuid;
-
-    /**
-     * @param mixed $payload 透传参数，没有什么用处，开发者自己只有发挥
+     * @param \Illuminate\Events\Dispatcher|null $events
      * @param string $host
      * @param int $port
      * @param int $mode
      * @param int $sockType
      */
-    public function __construct($payload, $host, $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
+    public function __construct($events = null, $host, $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
     {
-        $this->payload = $payload;
-        $this->host = $host;
-        $this->port = $port;
-        $this->mode = $mode;
-        $this->sockType = $sockType;
-        $this->serverUuid = md5(uniqid());
+        $this->events = $events ?? $this->createEvents();
+        $this->swooleServer = $this->createSwooleServer($host, $port, $mode, $sockType);
+    }
+
+    /**
+     * @param string $host
+     * @param int $port
+     * @param int $mode
+     * @param int $sockType
+     * @return \Swoole\Server
+     */
+    protected function createSwooleServer($host, $port, $mode, $sockType)
+    {
+        return new \Swoole\Server($host, $port, $mode, $sockType);
     }
 
     /**
      * @return \Illuminate\Events\Dispatcher
      */
-    public function dispatcher()
-    {
-        return $this->dispatcher ?? $this->dispatcher = $this->createDispatcher();
-    }
-
-    /**
-     * @return \Illuminate\Contracts\Foundation\Application|mixed
-     */
-    protected function createDispatcher()
+    protected function createEvents()
     {
         return app('events');
-    }
-
-    /**
-     * @return \Swoole\Server
-     */
-    public function swooleServer()
-    {
-        return $this->swooleServer ?? $this->swooleServer = $this->createSwooleServer();
-    }
-
-    /**
-     * @return \Swoole\Server
-     */
-    protected function createSwooleServer()
-    {
-        return new \Swoole\Server($this->host, $this->port, $this->mode, $this->sockType);
     }
 
     /**
@@ -118,7 +72,7 @@ class Server
      */
     public function enableHttpRequestToLaravel()
     {
-        $this->swooleServer()->set(['open_http_protocol' => true]);
+        $this->swooleServer->set(['open_http_protocol' => true]);
         $this->on(\Flysion\Swoolaravel\Events\Request::class, \Flysion\Swoolaravel\Listeners\RequestToLaravel::class);
     }
 
@@ -130,15 +84,15 @@ class Server
      */
     public function setProcessNamePrefix($prefix)
     {
-        $this->on(Start::before, function($server, Start $event) use($prefix) {
+        $this->on(Start::class, function($server, Start $event) use($prefix) {
             \swoole_set_process_name("{$prefix}master-{$event->server->master_pid}");
         });
 
-        $this->on(ManagerStart::before, function($server, ManagerStart $event) use($prefix) {
+        $this->on(ManagerStart::class, function($server, ManagerStart $event) use($prefix) {
             \swoole_set_process_name("{$prefix}manager-{$event->server->manager_pid}");
         });
 
-        $this->on(WorkerStart::before, function($server, WorkerStart $event) use($prefix) {
+        $this->on(WorkerStart::class, function($server, WorkerStart $event) use($prefix) {
             if($event->server->taskworker) {
                 \swoole_set_process_name("{$prefix}taskworker-{$event->server->worker_pid}-{$event->workerId}");
             } else {
@@ -149,26 +103,20 @@ class Server
 
     /**
      * @param string $name
-     * @param  \Closure[]|string[]  $listeners
+     * @param  \Closure[]|string[] $listeners
      * @throws
      */
     public function on($name, ...$listeners)
     {
-        $class = strpos($name, ':') > 0 ? explode(':', $name, 2)[0] : $name;
-
-        if (\Illuminate\Support\Str::startsWith($class, 'Flysion\Swoolaravel\Events'))
+        $ref = new \ReflectionClass($name);
+        if(!$this->events->hasListeners($name))
         {
-            $ref = new \ReflectionClass($class);
-
-            if($ref->implementsInterface(\Flysion\Swoolaravel\Events\SwooleEvent::class) && !$this->dispatcher()->hasListeners($class))
-            {
-                $this->registerSwooleServerEvent($class);
-            }
+            $this->registerSwooleServerEvent($name);
         }
 
         foreach($listeners as $listener)
         {
-            $this->dispatcher()->listen($class, $listener);
+            $this->events->listen($name, $listener);
         }
     }
 
@@ -177,14 +125,19 @@ class Server
      */
     protected function registerSwooleServerEvent($class)
     {
-        $this->swooleServer()->on($class::name, function(...$arguments) use($class) {
+        $this->swooleServer->on($class::name, function(...$arguments) use($class) {
             $event = new $class(...$arguments);
 
-            if($this->onBefore($class, $event) === false) {
+            $result = $this->onBefore($class, $event);
+
+            if($result === false) {
                 return;
+            } elseif($result !== null) {
+                $this->events->dispatch($class, [$this, $event, $result]);
+            } else {
+                $this->events->dispatch($class, [$this, $event]);
             }
 
-            $this->dispatcher()->dispatch($class, [$this, $event]);
             $this->onAfter($class, $event);
         });
     }
@@ -207,25 +160,24 @@ class Server
     /**
      * @param string $eventClass
      * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
-     * @return false|null
+     * @return false|null|mixed
      * @throws
      */
     final protected function onBefore($class, $event)
     {
-        // 内置 before
+        $result = null;
 
         $before = \Illuminate\Support\Str::camel('on_before_' . $class::name);
 
         if(method_exists($this, $before))
         {
-            if($this->{$before}($event) === false) {
+            $result = $this->{$before}($event);
+            if($result === false) {
                 return false;
             }
         }
 
-        // 用户 before
-
-        $this->dispatcher()->dispatch($class::before, $event);
+        return $result;
     }
 
     /**
@@ -243,10 +195,6 @@ class Server
         {
             $this->{$after}($event);
         }
-
-        // 用户 after
-
-        $this->dispatcher()->dispatch($class::after, $event);
     }
 
     /**
@@ -255,12 +203,17 @@ class Server
      */
     public function start($setting = [])
     {
-        $this->dispatcher()->dispatch(\Flysion\Swoolaravel\Events\Ready::class, [$this]);
-
-        $this->swooleServer()->set(array_merge($setting, $this->swooleServer()->setting ?? [], ['task_use_object' => false]));
-
         putenv('APP_RUNNING_IN_SWOOLE=TRUE');
-        $result = $this->swooleServer()->start();
+
+        app()->instance('server', $this);
+
+        if(method_exists($this, 'onReady')) {
+            $this->onReady();
+        }
+
+        $this->swooleServer->set(array_merge($setting, $this->swooleServer->setting ?? [], ['task_use_object' => false]));
+        $result = $this->swooleServer->start();
+
         putenv('APP_RUNNING_IN_SWOOLE=FALSE');
 
         return $result;
@@ -275,7 +228,7 @@ class Server
      */
     public function __call($name, $arguments)
     {
-        return $this->swooleServer()->$name(...$arguments);
+        return $this->swooleServer->$name(...$arguments);
     }
 
     /**
@@ -286,6 +239,6 @@ class Server
      */
     public function __get($name)
     {
-        return $this->swooleServer()->{$name};
+        return $this->swooleServer->{$name};
     }
 }

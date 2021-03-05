@@ -16,18 +16,8 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/learn?id=tcp%e7%b2%98%e5%8c%85%e9%97%ae%e9%a2%98 TCP 粘包问题
  * @link https://wiki.swoole.com/#/server/port 多端口监听
  */
-class Receive implements SwooleEvent
+class Receive
 {
-    /**
-     * 事件触发之前
-     */
-    const before = self::class . ':before';
-
-    /**
-     * 事件触发之后
-     */
-    const after = self::class . ':after';
-
     /**
      * swoole 事件名称
      */

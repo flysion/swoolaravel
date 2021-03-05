@@ -10,18 +10,8 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/websocket_server?id=onmessage onMessage
  * @link https://wiki.swoole.com/#/websocket_server?id=swoolewebsocketframe \Swoole\WebSocket\Frame
  */
-class Message implements SwooleEvent
+class Message
 {
-    /**
-     * 事件触发之前
-     */
-    const before = self::class . ':before';
-
-    /**
-     * 事件触发之后
-     */
-    const after = self::class . ':after';
-
     /**
      * swoole 事件名称
      */

@@ -21,18 +21,8 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/server/events?id=onclose onClose
  * @link https://wiki.swoole.com/#/server/setting?id=heartbeat_check_interval 心跳检测
  */
-class Close implements SwooleEvent
+class Close
 {
-    /**
-     * 事件触发之前
-     */
-    const before = self::class . ':before';
-
-    /**
-     * 事件触发之后
-     */
-    const after = self::class . ':after';
-
     /**
      * swoole 事件名称
      */
