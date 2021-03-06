@@ -10,11 +10,6 @@ namespace Flysion\Swoolaravel\Events;
 class AfterReload
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'afterReload';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;

@@ -2,6 +2,30 @@
 
 namespace Flysion\Swoolaravel;
 
+const events = [
+    'start' => Events\Start::class,
+    'shutdown' => Events\Shutdown::class,
+    'managerstart' => Events\ManagerStart::class,
+    'managerstop' => Events\ManagerStop::class,
+    'workerstart' => Events\WorkerStart::class,
+    'workerstop' => Events\WorkerStop::class,
+    'workerexit' => Events\WorkerExit::class,
+    'workererror' => Events\WorkerError::class,
+    'task' => Events\Task::class,
+    'finish' => Events\Finish::class,
+    'connect' => Events\Connect::class,
+    'open' => Events\Open::class,
+    'close' => Events\Close::class,
+    'packet' => Events\Packet::class,
+    'request' => Events\Request::class,
+    'message' => Events\Message::class,
+    'receive' => Events\Receive::class,
+    'pipemessage' => Events\PipeMessage::class,
+    'handshake' => Events\HandShake::class,
+    'beforereload' => Events\BeforeReload::class,
+    'afterreload' => Events\AfterReload::class,
+];
+
 /**
  * \Swooler\Http\Request to \Illuminate\Http\Request
  *
@@ -32,4 +56,14 @@ function swoole_request_to_laravel_request(\Swoole\Http\Request $request) : \Ill
         $server,
         $request->rawContent()
     );
+}
+
+/**
+ * 应用程序是否运行在 swoole 里
+ *
+ * @return bool
+ */
+function running_in_swoole()
+{
+    return env('APP_RUNNING_IN_SWOOLE');
 }

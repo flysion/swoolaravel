@@ -11,11 +11,6 @@ namespace Flysion\Swoolaravel\Events;
 class WorkerExit
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'workerExit';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;

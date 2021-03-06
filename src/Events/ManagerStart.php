@@ -21,11 +21,6 @@ namespace Flysion\Swoolaravel\Events;
 class ManagerStart
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'managerStart';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;

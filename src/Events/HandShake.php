@@ -16,11 +16,6 @@ namespace Flysion\Swoolaravel\Events;
 class HandShake
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'handShake';
-
-    /**
      * @var \Swoole\Http\Request
      */
     public $request;

@@ -24,11 +24,6 @@ namespace Flysion\Swoolaravel\Events;
 class Request
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'request';
-
-    /**
      * @var \Swoole\Http\Request
      */
     public $request;

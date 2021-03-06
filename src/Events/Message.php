@@ -13,11 +13,6 @@ namespace Flysion\Swoolaravel\Events;
 class Message
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'message';
-
-    /**
      * @var \Swoole\WebSocket\Server
      */
     public $server;

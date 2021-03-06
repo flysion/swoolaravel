@@ -19,11 +19,6 @@ namespace Flysion\Swoolaravel\Events;
 class Receive
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'receive';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;

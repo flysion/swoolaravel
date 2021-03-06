@@ -10,11 +10,6 @@ namespace Flysion\Swoolaravel\Events;
 class PipeMessage
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'pipeMessage';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;

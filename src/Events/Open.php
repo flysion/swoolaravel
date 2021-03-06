@@ -12,11 +12,6 @@ namespace Flysion\Swoolaravel\Events;
 class Open
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'open';
-
-    /**
      * @var \Swoole\WebSocket\Server
      */
     public $server;

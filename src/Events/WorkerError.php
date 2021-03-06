@@ -18,11 +18,6 @@ namespace Flysion\Swoolaravel\Events;
 class WorkerError
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'workerError';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;

@@ -15,11 +15,6 @@ namespace Flysion\Swoolaravel\Events;
 class Packet
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'packet';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;

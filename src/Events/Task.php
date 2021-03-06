@@ -20,11 +20,6 @@ namespace Flysion\Swoolaravel\Events;
 class Task
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'task';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;

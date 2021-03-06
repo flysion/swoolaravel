@@ -14,11 +14,6 @@ namespace Flysion\Swoolaravel\Events;
 class WorkerStop
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'workerStop';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;

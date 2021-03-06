@@ -22,11 +22,6 @@ namespace Flysion\Swoolaravel\Events;
 class Start
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'start';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;

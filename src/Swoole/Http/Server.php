@@ -11,27 +11,35 @@ namespace Flysion\Swoolaravel\Swoole\Http;
  * @link https://wiki.swoole.com/#/http_server
  * @mixin \Swoole\Http\Server
  */
-class Server extends \Flysion\Swoolaravel\Swoole\Server
+class Server extends \Swoole\Http\Server
 {
+    use \Flysion\Swoolaravel\Server;
+
+    /**
+     * 是否打开 http 协议
+     *
+     * @var bool
+     */
+    public $openHttpProtocol = true;
+
     /**
      * @param \Illuminate\Events\Dispatcher|null $events
      * @param string $host
      * @param int $port
+     * @param int $mode
+     * @param int $sockType
      */
-    public function __construct($events, $host, $port = 0)
+    public function __construct($events = null, $host = '0.0.0.0', $port = 0)
     {
-        parent::__construct($events, $host, $port);
+        parent::__construct($host, $port);
+        $this->events = $events ?? $this->createEvents();
     }
 
     /**
-     * @param string $host
-     * @param int $port
-     * @param int $mode
-     * @param int $sockType
-     * @return \Swoole\Server
+     * @return \Illuminate\Events\Dispatcher
      */
-    protected function createSwooleServer($host, $port, $mode, $sockType)
+    protected function createEvents()
     {
-        return new \Swoole\Http\Server($host, $port);
+        return app('events');
     }
 }

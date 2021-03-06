@@ -11,11 +11,6 @@ namespace Flysion\Swoolaravel\Events;
 class ManagerStop
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'managerStop';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;

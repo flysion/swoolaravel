@@ -18,11 +18,6 @@ namespace Flysion\Swoolaravel\Events;
 class WorkerStart
 {
     /**
-     * swoole 事件名称
-     */
-    const name = 'workerStart';
-
-    /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server;
