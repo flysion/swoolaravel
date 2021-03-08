@@ -32,7 +32,7 @@ trait Server
         parent::on($name, function(...$arguments) use($name, $class) {
             $event = new $class(...$arguments);
 
-            $result = $this->onBefore($class, $event);
+            $result = $this->onBefore($name, $event);
 
             if($result === false) {
                 return;
@@ -42,7 +42,7 @@ trait Server
                 $this->events->dispatch($name, [$this, $event]);
             }
 
-            $this->onAfter($class, $event);
+            $this->onAfter($name, $event);
         });
 
         foreach(Arr::wrap($listeners) as $listener)
@@ -114,11 +114,11 @@ trait Server
      * @return false|null|mixed
      * @throws
      */
-    final protected function onBefore($class, $event)
+    final protected function onBefore($name, $event)
     {
         $result = null;
 
-        $before = \Illuminate\Support\Str::camel('on_before_' . $class::name);
+        $before = \Illuminate\Support\Str::camel('on_before_' . $name);
 
         if(method_exists($this, $before))
         {
@@ -133,11 +133,11 @@ trait Server
      * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
      * @throws
      */
-    final protected function onAfter($class, $event)
+    final protected function onAfter($name, $event)
     {
         // 内置 after
 
-        $after = \Illuminate\Support\Str::camel('on_after_' . $class::name);
+        $after = \Illuminate\Support\Str::camel('on_after_' . $name);
 
         if(method_exists($this, $after))
         {
@@ -157,9 +157,9 @@ trait Server
         // 留给用户的可编程空间
         // 在服务启动之前做一些初始化工作
 
-        if(method_exists($this, 'onReady'))
+        if(method_exists($this, 'ready'))
         {
-            $this->onReady();
+            $this->ready();
         }
 
         // 服务设置
