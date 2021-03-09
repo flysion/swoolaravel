@@ -159,7 +159,7 @@ trait Server
 
         if(method_exists($this, 'ready'))
         {
-            $this->ready();
+            $this->ready($setting);
         }
 
         // 服务设置
