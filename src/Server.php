@@ -36,7 +36,7 @@ trait Server
 
             if($result === false) {
                 return;
-            } elseif($result !== null) {
+            } elseif(!is_null($result)) {
                 $this->events->dispatch($name, [$this, $event, $result]);
             } else {
                 $this->events->dispatch($name, [$this, $event]);
