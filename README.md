@@ -11,12 +11,12 @@
 
 // 步骤2
 $server = new class(app('events'), '0.0.0.0', 25001) extends \Flysion\Swoolaravel\Swoole\Http\Server {
-    public $processNamePrefix = 'test-';
+    public $serverName = 'test';
 
     public function onReady()
     {
         // 创建一个队列消费进程
-        $this->addProcess(new \Flysion\Swoolaravel\Swoole\Process\QueueWorker('redis', 'test', new \Illuminate\Queue\WorkerOptions(), $this->processNamePrefix));
+        $this->addProcess(new \Flysion\Swoolaravel\Swoole\Process\QueueWorker('redis', 'test', new \Illuminate\Queue\WorkerOptions()));
     }
 };
 

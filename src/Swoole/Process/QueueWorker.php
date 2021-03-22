@@ -18,16 +18,16 @@ class QueueWorker extends \Swoole\Process
     protected $queue;
 
     /**
+     * @var \Illuminate\Queue\WorkerOptions
+     */
+    protected $workerOptions;
+
+    /**
      * 在启动进程前调用
      *
      * @var callable
      */
     protected $onStart;
-
-    /**
-     * @var \Illuminate\Queue\WorkerOptions
-     */
-    protected $workerOptions;
 
     /**
      * @param string $connection
