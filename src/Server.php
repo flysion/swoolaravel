@@ -9,9 +9,9 @@ trait Server
     /**
      * 进程名称前缀
      *
-     * @var string $processNamePrefix
+     * @var string
      */
-    public $processNamePrefix = 'swoolaravel-';
+    public $serverName = 'swoolaravel';
 
     /**
      * @var \Illuminate\Events\Dispatcher
@@ -58,9 +58,9 @@ trait Server
      */
     protected function onBeforeStart(\Flysion\Swoolaravel\Events\Start $event)
     {
-        if($this->processNamePrefix)
+        if($this->serverName)
         {
-            \swoole_set_process_name("{$this->processNamePrefix}master-{$this->master_pid}");
+            \swoole_set_process_name("{$this->serverName}-master-{$this->master_pid}");
         }
     }
 
@@ -71,9 +71,9 @@ trait Server
      */
     protected function onBeforeManagerStart(\Flysion\Swoolaravel\Events\ManagerStart $event)
     {
-        if($this->processNamePrefix)
+        if($this->serverName)
         {
-            \swoole_set_process_name("{$this->processNamePrefix}manager-{$this->manager_pid}");
+            \swoole_set_process_name("{$this->serverName}-manager-{$this->manager_pid}");
         }
     }
 
@@ -99,11 +99,11 @@ trait Server
 
         // 设置工作进程名称
 
-        if($this->processNamePrefix) {
+        if($this->serverName) {
             if ($this->taskworker) {
-                \swoole_set_process_name("{$this->processNamePrefix}taskworker-{$this->worker_pid}-{$event->workerId}");
+                \swoole_set_process_name("{$this->serverName}-taskworker-{$this->worker_pid}-{$event->workerId}");
             } else {
-                \swoole_set_process_name("{$this->processNamePrefix}worker-{$this->worker_pid}-{$event->workerId}");
+                \swoole_set_process_name("{$this->serverName}-worker-{$this->worker_pid}-{$event->workerId}");
             }
         }
     }
@@ -146,6 +146,14 @@ trait Server
     }
 
     /**
+     * @param array &$setting
+     */
+    protected function boot(&$setting)
+    {
+
+    }
+
+    /**
      * @return mixed
      * @throws
      */
@@ -157,10 +165,7 @@ trait Server
         // 留给用户的可编程空间
         // 在服务启动之前做一些初始化工作
 
-        if(method_exists($this, 'ready'))
-        {
-            $this->ready($setting);
-        }
+        $this->boot($setting);
 
         // 服务设置
         // 当前设置 > 服务已有设置
