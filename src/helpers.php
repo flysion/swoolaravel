@@ -2,6 +2,7 @@
 
 namespace Flysion\Swoolaravel;
 
+use Symfony\Component\HttpFoundation\HeaderBag;
 const events = [
     'start' => Events\Start::class,
     'shutdown' => Events\Shutdown::class,
@@ -34,20 +35,13 @@ const events = [
  */
 function swoole_request_to_laravel_request(\Swoole\Http\Request $request) : \Illuminate\Http\Request
 {
-    $server = $_SERVER;
-    foreach($request->header as $k => $v)
-    {
-        $k = 'HTTP_' . str_replace('-', '_', strtoupper($k));
-        $server[$k] = $v;
-    }
-
     foreach($request->server as $k => $v)
     {
         $k = strtoupper($k);
         $server[$k] = $v;
     }
 
-    return \Illuminate\Http\Request::create(
+    $req = \Illuminate\Http\Request::create(
         $request->server['path_info'] . (@$request->server['query_string'] ? '?' . $request->server['query_string'] : ''),
         $request->server['request_method'],
         $request->post ?: [],
@@ -56,6 +50,10 @@ function swoole_request_to_laravel_request(\Swoole\Http\Request $request) : \Ill
         $server,
         $request->rawContent()
     );
+
+    $req->headers = new HeaderBag($request->header);
+
+    return $req;
 }
 
 /**
