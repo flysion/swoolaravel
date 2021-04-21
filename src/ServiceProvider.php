@@ -2,9 +2,7 @@
 
 namespace Flysion\Swoolaravel;
 
-use Illuminate\Contracts\Support\DeferrableProvider;
-
-class ServiceProvider extends \Illuminate\Support\ServiceProvider implements DeferrableProvider
+class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
     protected $commands = [
 
@@ -25,7 +23,11 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider implements Def
      */
     public function register()
     {
+        $this->publishes([
+            __DIR__ . '/../config/swoolaravel.php' => $this->app->configPath('swoolaravel.php')
+        ], 'swoolaravel');
 
+        $this->mergeConfigFrom(__DIR__ . '/../config/swoolaravel.php', 'swoolaravel');
     }
 
     /**
