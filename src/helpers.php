@@ -6,12 +6,12 @@ use Symfony\Component\HttpFoundation\HeaderBag;
 const events = [
     'start' => Events\Start::class,
     'shutdown' => Events\Shutdown::class,
-    'managerstart' => Events\ManagerStart::class,
-    'managerstop' => Events\ManagerStop::class,
-    'workerstart' => Events\WorkerStart::class,
-    'workerstop' => Events\WorkerStop::class,
-    'workerexit' => Events\WorkerExit::class,
-    'workererror' => Events\WorkerError::class,
+    'managerStart' => Events\ManagerStart::class,
+    'managerStop' => Events\ManagerStop::class,
+    'workerStart' => Events\WorkerStart::class,
+    'workerStop' => Events\WorkerStop::class,
+    'workerExit' => Events\WorkerExit::class,
+    'workerError' => Events\WorkerError::class,
     'task' => Events\Task::class,
     'finish' => Events\Finish::class,
     'connect' => Events\Connect::class,
@@ -21,10 +21,10 @@ const events = [
     'request' => Events\Request::class,
     'message' => Events\Message::class,
     'receive' => Events\Receive::class,
-    'pipemessage' => Events\PipeMessage::class,
-    'handshake' => Events\HandShake::class,
-    'beforereload' => Events\BeforeReload::class,
-    'afterreload' => Events\AfterReload::class,
+    'pipeMessage' => Events\PipeMessage::class,
+    'handShake' => Events\HandShake::class,
+    'beforeReload' => Events\BeforeReload::class,
+    'afterReload' => Events\AfterReload::class,
 ];
 
 /**

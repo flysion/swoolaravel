@@ -93,7 +93,7 @@ trait Server
         $consoleKernel = $app->make(\Illuminate\Contracts\Console\Kernel::class);
         $consoleKernel->bootstrap();
 
-        \Illuminate\Container\Container::setInstance($app);
+        \Illuminate\Foundation\Application::setInstance($app);
 
         $app->instance('server', $this);
 
@@ -118,7 +118,7 @@ trait Server
     {
         $result = null;
 
-        $before = \Illuminate\Support\Str::camel('on_before_' . $name);
+        $before = 'onBefore' . ucfirst($name);
 
         if(method_exists($this, $before))
         {
@@ -137,7 +137,7 @@ trait Server
     {
         // 内置 after
 
-        $after = \Illuminate\Support\Str::camel('on_after_' . $name);
+        $after = $before = 'onAfter' . ucfirst($name);
 
         if(method_exists($this, $after))
         {
