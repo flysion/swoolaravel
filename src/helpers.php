@@ -3,6 +3,7 @@
 namespace Flysion\Swoolaravel;
 
 use Symfony\Component\HttpFoundation\HeaderBag;
+
 const events = [
     'start' => Events\Start::class,
     'shutdown' => Events\Shutdown::class,
