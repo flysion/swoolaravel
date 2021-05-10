@@ -4,7 +4,7 @@ namespace Flysion\Swoolaravel\Swoole\Process;
 /**
  * 创建一个 swoole 进程，用于调用 laravel 命令
  */
-class Artisan extends \Swoole\Process
+class Artisan extends Process
 {
     /**
      * @var string
@@ -33,14 +33,13 @@ class Artisan extends \Swoole\Process
      * @param array $parameters
      * @param \Symfony\Component\Console\Output\OutputInterface|null $outputBuffer
      * @param callable|null $onStart
-     * @param null $redirect_stdin_and_stdout
-     * @param null $pipe_type
-     * @param null $enable_coroutine
+     * @param bool $redirect_stdin_and_stdout
+     * @param int $pipe_type
+     * @param bool $enable_coroutine
      */
-    public function __construct($command, $parameters, $outputBuffer, $onStart = null, $redirect_stdin_and_stdout = null, $pipe_type = null, $enable_coroutine = null)
+    public function __construct($command, $parameters, $outputBuffer, $onStart = null, $redirect_stdin_and_stdout = false, $pipe_type = SOCK_DGRAM, $enable_coroutine = false)
     {
         parent::__construct(
-            [$this, 'handle'],
             $redirect_stdin_and_stdout,
             $pipe_type,
             $enable_coroutine
@@ -51,6 +50,7 @@ class Artisan extends \Swoole\Process
         $this->outputBuffer = $outputBuffer;
         $this->onStart = $onStart;
     }
+
     /**
      * 执行队列消费
      *

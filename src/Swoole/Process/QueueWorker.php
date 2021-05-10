@@ -5,7 +5,7 @@ namespace Flysion\Swoolaravel\Swoole\Process;
 /**
  * 创建一个 swoole 进程，用于消费 laravel 的队列
  */
-class QueueWorker extends \Swoole\Process
+class QueueWorker extends Process
 {
     /**
      * @var string
@@ -34,14 +34,13 @@ class QueueWorker extends \Swoole\Process
      * @param string $queue
      * @param \Illuminate\Queue\WorkerOptions $workerOptions
      * @param callable|null $onStart
-     * @param null $redirect_stdin_and_stdout
-     * @param null $pipe_type
-     * @param null $enable_coroutine
+     * @param bool $redirect_stdin_and_stdout
+     * @param int $pipe_type
+     * @param bool $enable_coroutine
      */
-    public function __construct($connection, $queue, $workerOptions, $onStart = null, $redirect_stdin_and_stdout = null, $pipe_type = null, $enable_coroutine = null)
+    public function __construct($connection, $queue, $workerOptions, $onStart = null, $redirect_stdin_and_stdout = false, $pipe_type = SOCK_DGRAM, $enable_coroutine = false)
     {
         parent::__construct(
-            [$this, 'handle'],
             $redirect_stdin_and_stdout,
             $pipe_type,
             $enable_coroutine
@@ -60,10 +59,6 @@ class QueueWorker extends \Swoole\Process
      */
     public function handle()
     {
-        if(is_callable($this->onStart)) {
-            call_user_func_array($this->onStart, [$this]);
-        }
-
         $quit = false;
 
         // 在 shutdown 关闭服务器时，会向用户进程发送 SIGTERM 信号，关闭用户进程
@@ -79,6 +74,16 @@ class QueueWorker extends \Swoole\Process
         while(!$quit) {
             $queue->runNextJob($this->connection, $this->queue, $this->workerOptions);
             pcntl_signal_dispatch();
+        }
+    }
+
+    /**
+     *
+     */
+    protected function onStart()
+    {
+        if(is_callable($this->onStart)) {
+            call_user_func_array($this->onStart, [$this]);
         }
     }
 }

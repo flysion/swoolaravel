@@ -25,8 +25,6 @@ trait Server
      */
     public function on($name, $listeners)
     {
-        $name = strtolower($name);
-
         $class = \Flysion\Swoolaravel\events[$name];
 
         parent::on($name, function(...$arguments) use($name, $class) {
@@ -90,8 +88,7 @@ trait Server
 
         $app = require base_path('/bootstrap/app.php');
 
-        $consoleKernel = $app->make(\Illuminate\Contracts\Console\Kernel::class);
-        $consoleKernel->bootstrap();
+        $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
         \Illuminate\Foundation\Application::setInstance($app);
 
