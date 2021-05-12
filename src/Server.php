@@ -108,6 +108,10 @@ trait Server
      */
     final protected function onBefore($name, $event)
     {
+        $this->events->dispatch("{$name}:before", [$this, $event]);
+
+        //
+
         $before = 'onBefore' . ucfirst($name);
 
         if(method_exists($this, $before))
@@ -116,8 +120,6 @@ trait Server
                 return false;
             }
         }
-
-        $this->events->dispatch("{$name}:before", [$this, $event]);
     }
 
     /**
@@ -127,16 +129,16 @@ trait Server
      */
     final protected function onAfter($name, $event)
     {
-        $this->events->dispatch("{$name}:after", [$this, $event]);
-
-        // 内置 after
-
         $after = 'onAfter' . ucfirst($name);
 
         if(method_exists($this, $after))
         {
             $this->{$after}($event);
         }
+
+        //
+
+        $this->events->dispatch("{$name}:after", [$this, $event]);
     }
 
     /**
