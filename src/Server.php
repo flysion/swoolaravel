@@ -30,15 +30,11 @@ trait Server
         parent::on($name, function(...$arguments) use($name, $class) {
             $event = new $class(...$arguments);
 
-            $result = $this->onBefore($name, $event);
-
-            if($result === false) {
+            if($this->onBefore($name, $event) === false) {
                 return;
-            } elseif(!is_null($result)) {
-                $this->events->dispatch($name, [$this, $event, $result]);
-            } else {
-                $this->events->dispatch($name, [$this, $event]);
             }
+
+            $this->events->dispatch($name, [$this, $event]);
 
             $this->onAfter($name, $event);
         });
@@ -108,21 +104,20 @@ trait Server
     /**
      * @param string $eventClass
      * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
-     * @return false|null|mixed
      * @throws
      */
     final protected function onBefore($name, $event)
     {
-        $result = null;
-
         $before = 'onBefore' . ucfirst($name);
 
         if(method_exists($this, $before))
         {
-            $result = $this->{$before}($event);
+            if($this->{$before}($event) === false) {
+                return false;
+            }
         }
 
-        return $result;
+        $this->events->dispatch("{$name}:before", [$this, $event]);
     }
 
     /**
@@ -132,6 +127,8 @@ trait Server
      */
     final protected function onAfter($name, $event)
     {
+        $this->events->dispatch("{$name}:after", [$this, $event]);
+
         // 内置 after
 
         $after = 'onAfter' . ucfirst($name);
