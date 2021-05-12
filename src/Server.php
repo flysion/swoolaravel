@@ -25,18 +25,24 @@ trait Server
      */
     public function on($name, $listeners)
     {
-        $class = \Flysion\Swoolaravel\events[$name];
+        if(strpos($name, ':') > 0) {
+            list($eventName, $_) = explode(':', $name, 2);
+        } else {
+            $eventName = $name;
+        }
 
-        parent::on($name, function(...$arguments) use($name, $class) {
+        $class = \Flysion\Swoolaravel\events[$eventName];
+
+        parent::on($eventName, function(...$arguments) use($eventName, $class) {
             $event = new $class(...$arguments);
 
-            if($this->onBefore($name, $event) === false) {
+            if($this->onBefore($eventName, $event) === false) {
                 return;
             }
 
-            $this->events->dispatch($name, [$this, $event]);
+            $this->events->dispatch($eventName, [$this, $event]);
 
-            $this->onAfter($name, $event);
+            $this->onAfter($eventName, $event);
         });
 
         foreach(Arr::wrap($listeners) as $listener)
