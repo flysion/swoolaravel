@@ -134,7 +134,7 @@ trait Server
     {
         // 内置 after
 
-        $after = $before = 'onAfter' . ucfirst($name);
+        $after = 'onAfter' . ucfirst($name);
 
         if(method_exists($this, $after))
         {
