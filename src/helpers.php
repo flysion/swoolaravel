@@ -50,7 +50,7 @@ function swoole_request_to_laravel_request(\Swoole\Http\Request $request) : \Ill
         $server[$k] = $v;
     }
 
-    if($server['HTTP_CONTENT_TYPE']) {
+    if(isset($server['HTTP_CONTENT_TYPE'])) {
         $server['CONTENT_TYPE'] = $server['HTTP_CONTENT_TYPE'];
     }
 
