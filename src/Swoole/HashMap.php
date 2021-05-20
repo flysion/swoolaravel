@@ -2,7 +2,7 @@
 
 namespace Flysion\Swoolaravel\Swoole;
 
-class Mem
+class HashMap
 {
     /**
      * @var \Swoole\Table
@@ -10,45 +10,33 @@ class Mem
     protected $data;
 
     /**
-     * @param null $conflict_proportion
+     * @param array $columns
+     * @param null|float $conflict_proportion
      */
-    public function __construct($fields, $conflict_proportion = null)
+    public function __construct($columns, $conflict_proportion = null)
     {
         $this->data = new \Swoole\Table(1, $conflict_proportion);
 
-        foreach($fields as $field => $option)
+        foreach($columns as $name => $option)
         {
-            $this->data->column($field, ...$option);
+            $this->data->column($name, ...$option);
         }
 
         $this->data->create();
     }
 
     /**
+     * @param string|null
      * @param null $conflict_proportion
      * @return static
      * @throws \ReflectionException
      */
-    public static function createFromProperty($conflict_proportion = null)
+    public static function createFromProperty($class = null, $conflict_proportion = null)
     {
-        $fields = [];
-
-        $ref = new \ReflectionClass(static::class);
-        foreach(explode("\n", $ref->getDocComment()) as $line)
-        {
-            if(preg_match('/^\*\s*@property\s+(int|float|string\((\d+)\))\s+\$(\w+)/', trim($line), $result))
-            {
-                if($result[2]) {
-                    $fields[$result[3]] = [\Swoole\Table::TYPE_STRING, intval($result[2])];
-                } elseif($result[1] === 'int') {
-                    $fields[$result[3]] = [\Swoole\Table::TYPE_INT];
-                } elseif($result[1] === 'float') {
-                    $fields[$result[3]] = [\Swoole\Table::TYPE_FLOAT];
-                }
-            }
-        }
-
-        return new static($fields);
+        return new static(
+            \Flysion\Swoolaravel\parse_class_property_to_table_column($class ?? static::class),
+            $conflict_proportion
+        );
     }
 
     /**
@@ -74,7 +62,7 @@ class Mem
     /**
      * @param string $key
      * @param array $value
-     * @return mixed
+     * @return bool
      */
     public function set($key, $value)
     {
@@ -83,11 +71,38 @@ class Mem
 
     /**
      * @param string $key
-     * @return mixed
+     * @return mixed|false
      */
     public function get($key)
     {
-        return @$this->data->get(0, $key);
+        $value = $this->data->get(0, $key);
+        if($value === false) {
+            return $this->defaultValue($key);
+        }
+
+        return $value === false ? null : $value;
+    }
+
+    /**
+     * @param string $key
+     * @return mixed|null
+     */
+    protected function defaultValue($key)
+    {
+        $method = 'default' . ucfirst(\Illuminate\Support\Str::camel($key));
+        if(method_exists($this, $method)) {
+            return $this->{$method}();
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array
+     */
+    public function all()
+    {
+        return $this->data->get(0);
     }
 
     /**

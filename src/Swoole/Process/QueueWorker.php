@@ -64,6 +64,7 @@ class QueueWorker extends Process
         // 在 shutdown 关闭服务器时，会向用户进程发送 SIGTERM 信号，关闭用户进程
         pcntl_signal(SIGTERM/*15*/, function($signo) use(&$quit) {
             $quit = true;
+
         });
 
         /**
@@ -72,8 +73,13 @@ class QueueWorker extends Process
         $queue = app('queue.worker');
 
         while(!$quit) {
-            $queue->runNextJob($this->connection, $this->queue, $this->workerOptions);
             pcntl_signal_dispatch();
+
+            try {
+                $queue->runNextJob($this->connection, $this->queue, $this->workerOptions);
+            } catch (\Exception $e) {
+                report($e);
+            }
         }
     }
 

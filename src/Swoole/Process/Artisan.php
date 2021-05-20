@@ -52,16 +52,22 @@ class Artisan extends Process
     }
 
     /**
+     *
+     */
+    protected function onStart()
+    {
+        if(is_callable($this->onStart)) {
+            call_user_func_array($this->onStart, [$this]);
+        }
+    }
+
+    /**
      * 执行队列消费
      *
      * @return void
      */
     public function handle()
     {
-        if(is_callable($this->onStart)) {
-            call_user_func_array($this->onStart, [$this]);
-        }
-
         \Illuminate\Support\Facades\Artisan::call($this->command, $this->parameters, $this->outputBuffer);
     }
 }

@@ -83,3 +83,35 @@ function running_in_swoole()
 {
     return env('APP_RUNNING_IN_SWOOLE');
 }
+
+/**
+ * 通过 class 注释中的"@property"解析属性列表，用于创建一个 \Swoole\Table
+ *
+ * @see \Swoole\Table
+ * @param $class
+ * @return array
+ * @throws \ReflectionException
+ */
+function parse_class_property_to_table_column($class)
+{
+    $fields = [];
+
+    $reflectionClass = new \ReflectionClass($class);
+    $comments = explode("\n", $reflectionClass->getDocComment());
+
+    foreach($comments as $line)
+    {
+        if(preg_match('/^\*\s*@property\s+(int|float|string\((\d+)\))\s+\$(\w+)/', trim($line), $result))
+        {
+            if($result[2]) {
+                $fields[$result[3]] = [\Swoole\Table::TYPE_STRING, intval($result[2])];
+            } elseif($result[1] === 'int') {
+                $fields[$result[3]] = [\Swoole\Table::TYPE_INT];
+            } elseif($result[1] === 'float') {
+                $fields[$result[3]] = [\Swoole\Table::TYPE_FLOAT];
+            }
+        }
+    }
+
+    return $fields;
+}

@@ -36,13 +36,17 @@ trait Server
         parent::on($eventName, function(...$arguments) use($eventName, $class) {
             $event = new $class(...$arguments);
 
-            if($this->onBefore($eventName, $event) === false) {
-                return;
+            try {
+                if ($this->onBefore($eventName, $event) === false) {
+                    return;
+                }
+
+                $this->events->dispatch($eventName, [$this, $event]);
+
+                $this->onAfter($eventName, $event);
+            } catch (\Exception $e) {
+                report($e);
             }
-
-            $this->events->dispatch($eventName, [$this, $event]);
-
-            $this->onAfter($eventName, $event);
         });
 
         foreach(Arr::wrap($listeners) as $listener)
@@ -108,16 +112,13 @@ trait Server
     }
 
     /**
-     * @param string $eventClass
+     * @param string $name
      * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
+     * @return void|false
      * @throws
      */
     final protected function onBefore($name, $event)
     {
-        $this->events->dispatch("{$name}:before", [$this, $event]);
-
-        //
-
         $before = 'onBefore' . ucfirst($name);
 
         if(method_exists($this, $before))
@@ -126,11 +127,16 @@ trait Server
                 return false;
             }
         }
+
+        //
+
+        $this->events->dispatch("{$name}:before", [$this, $event]);
     }
 
     /**
-     * @param string $eventClass
+     * @param string $name
      * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
+     * @return void|false
      * @throws
      */
     final protected function onAfter($name, $event)
@@ -161,16 +167,13 @@ trait Server
      */
     public function start($setting = [])
     {
-        // 注入一个服务实例到应用程序容器里
         app()->instance('server', $this);
 
-        // 留给用户的可编程空间
-        // 在服务启动之前做一些初始化工作
+        //
 
         $this->boot($setting);
 
-        // 服务设置
-        // 当前设置 > 服务已有设置
+        //
 
         $newSetting = array_merge($this->setting ?? [], $setting, ['task_use_object' => false]);
 
@@ -181,7 +184,7 @@ trait Server
 
         $this->set($newSetting);
 
-        // 通过判断是否实现了某些方法从而决定是否要注册某些 swoole 事件
+        //
 
         foreach(\Flysion\Swoolaravel\events as $name => $class)
         {
@@ -194,8 +197,7 @@ trait Server
             }
         }
 
-        // 启动服务
-        // 标记应用程序是在 swoole 中执行
+        //
 
         putenv('APP_RUNNING_IN_SWOOLE=TRUE');
         $result = parent::start();
