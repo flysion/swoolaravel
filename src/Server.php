@@ -11,7 +11,7 @@ trait Server
      *
      * @var string
      */
-    public $serverName = 'swoolaravel';
+    public $processNamePrefix = 'swoolaravel';
 
     /**
      * @var \Illuminate\Events\Dispatcher
@@ -62,9 +62,9 @@ trait Server
      */
     protected function onBeforeStart(\Flysion\Swoolaravel\Events\Start $event)
     {
-        if($this->serverName)
+        if($this->processNamePrefix)
         {
-            \swoole_set_process_name("{$this->serverName}-master-{$this->master_pid}");
+            \swoole_set_process_name("{$this->processNamePrefix}-master-{$this->master_pid}");
         }
     }
 
@@ -75,9 +75,9 @@ trait Server
      */
     protected function onBeforeManagerStart(\Flysion\Swoolaravel\Events\ManagerStart $event)
     {
-        if($this->serverName)
+        if($this->processNamePrefix)
         {
-            \swoole_set_process_name("{$this->serverName}-manager-{$this->manager_pid}");
+            \swoole_set_process_name("{$this->processNamePrefix}-manager-{$this->manager_pid}");
         }
     }
 
@@ -102,11 +102,11 @@ trait Server
 
         // 设置工作进程名称
 
-        if($this->serverName) {
+        if($this->processNamePrefix) {
             if ($this->taskworker) {
-                \swoole_set_process_name("{$this->serverName}-taskworker-{$this->worker_pid}-{$event->workerId}");
+                \swoole_set_process_name("{$this->processNamePrefix}-taskworker-{$this->worker_pid}-{$event->workerId}");
             } else {
-                \swoole_set_process_name("{$this->serverName}-worker-{$this->worker_pid}-{$event->workerId}");
+                \swoole_set_process_name("{$this->processNamePrefix}-worker-{$this->worker_pid}-{$event->workerId}");
             }
         }
     }
@@ -134,6 +134,61 @@ trait Server
     }
 
     /**
+     * @param mixed $message
+     * @param int $workerId
+     * @return bool
+     */
+    public function sendMessageToTaskWorker($message, $workerId)
+    {
+        if($workerId >= 0) {
+            return parent::sendMessage($message, $workerId);
+        }
+
+        $workers = $this->taskWorkers();
+        shuffle($workers);
+
+        foreach($workers as $workerId)
+        {
+            if($this->getWorkerStatus() !== SWOOLE_WORKER_IDLE) continue;
+        }
+
+        return $this->sendMessageToTaskWorker($message, $workerId);
+    }
+
+    /**
+     * 工作进程
+     *
+     * @return int[]
+     */
+    public function workers()
+    {
+        return range(0, max(0, @$this->setting['work_num'] - 1));
+    }
+
+    /**
+     * task worker 进程
+     *
+     * @return int[]
+     */
+    public function taskWorkers()
+    {
+        return range(
+            max(0, @$this->setting['work_num'] - 1),
+            max(0, @$this->setting['worker_num'] + @$this->setting['task_worker_num'] - 1)
+        );
+    }
+
+    /**
+     * 所有 worker 进程
+     *
+     * @return int[]
+     */
+    public function allWorkers()
+    {
+        return range(0, max(0, @$this->setting['worker_num'] + @$this->setting['task_worker_num'] - 1));
+    }
+
+    /**
      * @param string $name
      * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
      * @return void|false
@@ -154,35 +209,50 @@ trait Server
     }
 
     /**
-     * @param array &$setting
+     * 获取服务配置
+     *
+     * @param array $setting start 方法传过来的服务配置
+     * @return array
      */
-    protected function boot(&$setting)
+    protected function setting($setting)
+    {
+        return $setting;
+    }
+
+    /**
+     * 启动引导程序
+     * 在 start 前执行
+     *
+     * @param array $setting
+     */
+    protected function boot($setting)
     {
 
     }
 
     /**
+     * @param array $setting
      * @return mixed
      * @throws
      */
     public function start($setting = [])
     {
-        app()->instance('server', $this);
-
-        //
-
         $this->boot($setting);
 
         //
 
-        $newSetting = array_merge($this->setting ?? [], $setting, ['task_use_object' => false]);
+        $setting = array_merge(
+            $this->setting ?? [],
+            $this->setting($setting),
+            ['task_use_object' => false]
+        );
 
         if($this->openHttpProtocol) {
-            $newSetting['open_http_protocol'] = true;
+            $setting['open_http_protocol'] = true;
             $this->on('request', \Flysion\Swoolaravel\Listeners\RequestToLaravel::class);
         }
 
-        $this->set($newSetting);
+        $this->set($setting);
 
         //
 
@@ -200,7 +270,10 @@ trait Server
         //
 
         putenv('APP_RUNNING_IN_SWOOLE=TRUE');
+
+        app()->instance('server', $this);
         $result = parent::start();
+
         putenv('APP_RUNNING_IN_SWOOLE=FALSE');
 
         return $result;

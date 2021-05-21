@@ -89,7 +89,7 @@ class HashMap
      */
     protected function defaultValue($key)
     {
-        $method = 'default' . ucfirst(\Illuminate\Support\Str::camel($key));
+        $method = 'default' . ucfirst(\Illuminate\Support\Str::camel($key)) . 'Value';
         if(method_exists($this, $method)) {
             return $this->{$method}();
         }
