@@ -2,12 +2,17 @@
 
 namespace Flysion\Swoolaravel\Swoole;
 
-class HashMap
+class HashStore
 {
     /**
      * @var \Swoole\Table
      */
     protected $data;
+
+    /**
+     * @var
+     */
+    protected $columns;
 
     /**
      * @param array $columns
@@ -23,6 +28,10 @@ class HashMap
         }
 
         $this->data->create();
+
+        //
+
+        $this->columns = $columns;
     }
 
     /**
