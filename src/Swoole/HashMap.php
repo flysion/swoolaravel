@@ -13,7 +13,7 @@ class HashMap
      * @param array $columns
      * @param null|float $conflict_proportion
      */
-    public function __construct($columns, $conflict_proportion = null)
+    public function __construct(array $columns, $conflict_proportion = null)
     {
         $this->data = new \Swoole\Table(1, $conflict_proportion);
 
