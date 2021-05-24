@@ -224,20 +224,22 @@ trait Server
      * 在 start 前执行
      *
      * @param array $setting
+     * @param mixed[] $arguments
      */
-    protected function boot($setting)
+    protected function boot($setting = [], ...$arguments)
     {
 
     }
 
     /**
      * @param array $setting
+     * @param mixed[] $arguments
      * @return mixed
      * @throws
      */
-    public function start($setting = [])
+    public function start($setting = [], ...$arguments)
     {
-        $this->boot($setting);
+        $this->boot($setting = [], ...$arguments);
 
         //
 
