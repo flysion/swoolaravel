@@ -226,7 +226,7 @@ trait Server
      * @param array $setting
      * @param mixed[] $arguments
      */
-    protected function boot($setting = [], ...$arguments)
+    protected function boot(&$setting, ...$arguments)
     {
 
     }
@@ -239,7 +239,7 @@ trait Server
      */
     public function start($setting = [], ...$arguments)
     {
-        $this->boot($setting = [], ...$arguments);
+        $this->boot($setting, ...$arguments);
 
         //
 
