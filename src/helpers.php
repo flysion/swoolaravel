@@ -2,9 +2,6 @@
 
 namespace Flysion\Swoolaravel;
 
-use Symfony\Component\HttpFoundation\HeaderBag;
-use Symfony\Component\HttpFoundation\ServerBag;
-
 const events = [
     'start' => Events\Start::class,
     'shutdown' => Events\Shutdown::class,
@@ -101,16 +98,19 @@ function parse_class_property_to_table_column($class)
 
     foreach($comments as $line)
     {
-        if(preg_match('/^\*\s*@property\s+(int|float|string\((\d+)\))\s+\$(\w+)/', trim($line), $result))
-        {
-            if($result[2]) {
-                $fields[$result[3]] = [\Swoole\Table::TYPE_STRING, intval($result[2])];
-            } elseif($result[1] === 'int') {
-                $fields[$result[3]] = [\Swoole\Table::TYPE_INT];
-            } elseif($result[1] === 'float') {
-                $fields[$result[3]] = [\Swoole\Table::TYPE_FLOAT];
-            }
+        if(preg_match('/^\*\s*@property\s+(int|float|bool)\s+\$(\w+)/', trim($line), $result)) {
+            $name = $result[2];
+            $dataType = $result[1];
+            $length = null;
+        } elseif(preg_match('/^\*\s*@property\s+(string|array)\((\d+)\)\s+\$(\w+)/', trim($line), $result)) {
+            $name = $result[3];
+            $dataType = $result[1];
+            $length = intval($result[2]);
+        } else {
+            continue;
         }
+
+        $fields[$name] = [$dataType, $length];
     }
 
     return $fields;

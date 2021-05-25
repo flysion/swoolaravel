@@ -17,21 +17,18 @@ class HashStore
     /**
      * @param array $columns
      * @param null|float $conflict_proportion
+     * @throws
      */
     public function __construct(array $columns, $conflict_proportion = null)
     {
         $this->data = new \Swoole\Table(1, $conflict_proportion);
 
-        foreach($columns as $name => $option)
+        foreach($columns as $name => list($dataType, $length))
         {
-            $this->data->column($name, ...$option);
+            $this->addColumn($name, $dataType, $length);
         }
 
         $this->data->create();
-
-        //
-
-        $this->columns = $columns;
     }
 
     /**
@@ -49,9 +46,81 @@ class HashStore
     }
 
     /**
+     * @param string $name
+     * @param string $dataType
+     * @param int|null $length
+     * @throws
+     */
+    protected function addColumn($name, $dataType, $length = null)
+    {
+        switch ($dataType) {
+            case 'bool':
+            case 'int':
+                $this->data->column($name, \Swoole\Table::TYPE_INT);
+                break;
+            case 'float':
+                $this->data->column($name, \Swoole\Table::TYPE_FLOAT);
+                break;
+            case 'array':
+            case 'string':
+                $this->data->column($name, \Swoole\Table::TYPE_STRING, $length);
+                break;
+            default:
+                throw new \Exception("Not suppert data-type: {$dataType}");
+        }
+
+        $this->columns[$name]['dataType'] = $dataType;
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function unserialize($key, $value)
+    {
+        $dataType = $this->columns[$key]['dataType'];
+
+        switch ($dataType) {
+            case 'int':
+            case 'float':
+            case 'string':
+                return $value;
+            case 'bool':
+                return $value !== 0;
+            case 'array':
+                return unserialize($value);
+        }
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return mixed
+     */
+    protected function serialize($key, $value)
+    {
+        $dataType = $this->columns[$key]['dataType'];
+
+        switch ($dataType) {
+            case 'int':
+                return intval($value);
+            case 'float':
+                return floatval($value);
+            case 'string':
+                return strval($value);
+            case 'bool':
+                return $value ? 1 : 0;
+            case 'array':
+                return serialize($value);
+        }
+    }
+
+    /**
      * @param string $key
      * @param int $incrby
      * @return int
+     * @throws
      */
     public function incr($key, $incrby = 1)
     {
@@ -62,6 +131,7 @@ class HashStore
      * @param string $key
      * @param int $decrby
      * @return int
+     * @throws
      */
     public function decr($key, $decrby = 1)
     {
@@ -70,53 +140,53 @@ class HashStore
 
     /**
      * @param string $key
-     * @param array $value
+     * @param mixed $value
      * @return bool
+     * @throws
      */
     public function set($key, $value)
     {
-        return $this->data->set(0, [$key => $value]);
+        return $this->data->set(0, [
+            $key => $this->serialize($key, $value),
+        ]);
     }
 
     /**
      * @param string $key
+     * @param mixed $default
      * @return mixed|false
+     * @throws
      */
-    public function get($key)
+    public function get($key, $default = null)
     {
         $value = $this->data->get(0, $key);
         if($value === false) {
-            return $this->defaultValue($key);
+            return $default;
         }
 
-        return $value === false ? null : $value;
-    }
-
-    /**
-     * @param string $key
-     * @return mixed|null
-     */
-    protected function defaultValue($key)
-    {
-        $method = 'default' . ucfirst(\Illuminate\Support\Str::camel($key)) . 'Value';
-        if(method_exists($this, $method)) {
-            return $this->{$method}();
-        }
-
-        return null;
+        return $this->unserialize($key, $value);
     }
 
     /**
      * @return array
+     * @throws
      */
     public function all()
     {
-        return $this->data->get(0);
+        $data = $this->data->get(0) ?: [];
+
+        foreach($data as $key => $value)
+        {
+            $data[$key] = $this->unserialize($key, $value);
+        }
+
+        return $data;
     }
 
     /**
      * @param string $name
      * @return mixed
+     * @throws
      */
     public function __get($name)
     {
@@ -124,8 +194,9 @@ class HashStore
     }
 
     /**
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param mixed $value
+     * @throws
      */
     public function __set($name, $value)
     {
