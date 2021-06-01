@@ -138,7 +138,7 @@ trait Server
      * @param int $workerId
      * @return bool
      */
-    public function sendMessageToTaskWorker($message, $workerId)
+    public function sendMessage($message, $workerId)
     {
         if($workerId >= 0) {
             return parent::sendMessage($message, $workerId);
@@ -152,7 +152,7 @@ trait Server
             if($this->getWorkerStatus($workerId) === SWOOLE_WORKER_IDLE) break;
         }
 
-        return $this->sendMessageToTaskWorker($message, $workerId);
+        return $this->sendMessage($message, $workerId);
     }
 
     /**
