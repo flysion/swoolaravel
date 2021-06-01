@@ -134,28 +134,6 @@ trait Server
     }
 
     /**
-     * @param mixed $message
-     * @param int $workerId
-     * @return bool
-     */
-    public function sendMessage($message, $workerId)
-    {
-        if($workerId >= 0) {
-            return parent::sendMessage($message, $workerId);
-        }
-
-        $workers = $this->taskWorkers();
-        shuffle($workers);
-
-        foreach($workers as $workerId)
-        {
-            if($this->getWorkerStatus($workerId) === SWOOLE_WORKER_IDLE) break;
-        }
-
-        return $this->sendMessage($message, $workerId);
-    }
-
-    /**
      * 工作进程
      *
      * @return int[]
