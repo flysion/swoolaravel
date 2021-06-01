@@ -149,7 +149,7 @@ trait Server
 
         foreach($workers as $workerId)
         {
-            if($this->getWorkerStatus($workerId) !== SWOOLE_WORKER_IDLE) continue;
+            if($this->getWorkerStatus($workerId) === SWOOLE_WORKER_IDLE) break;
         }
 
         return $this->sendMessageToTaskWorker($message, $workerId);
