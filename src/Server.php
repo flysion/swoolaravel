@@ -88,18 +88,6 @@ trait Server
      */
     protected function onBeforeWorkerStart(\Flysion\Swoolaravel\Events\WorkerStart $event)
     {
-        // 加载一个新的app替换老的app
-        // 这里主要作用是实现代码reload
-        // 这将影响 app() 返回的实例
-
-        $app = require base_path('/bootstrap/app.php');
-
-        $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-
-        \Illuminate\Foundation\Application::setInstance($app);
-
-        $app->instance('server', $this);
-
         // 设置工作进程名称
 
         if($this->processNamePrefix) {
@@ -109,6 +97,18 @@ trait Server
                 \swoole_set_process_name("{$this->processNamePrefix}-worker-{$this->worker_pid}-{$event->workerId}");
             }
         }
+
+        // 加载一个新的app替换老的app
+        // 这里主要作用是重置框架里的一些东西（清除容器）
+
+        $app = require base_path('/bootstrap/app.php');
+        $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+        // 重新注册 app 实例，通过 app() 方法可获取该实例
+
+        \Illuminate\Foundation\Application::setInstance($app);
+
+        $app->instance('server', $this);
     }
 
     /**
@@ -149,7 +149,7 @@ trait Server
 
         foreach($workers as $workerId)
         {
-            if($this->getWorkerStatus() !== SWOOLE_WORKER_IDLE) continue;
+            if($this->getWorkerStatus($workerId) !== SWOOLE_WORKER_IDLE) continue;
         }
 
         return $this->sendMessageToTaskWorker($message, $workerId);
