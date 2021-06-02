@@ -93,12 +93,12 @@ class Message implements ShouldQueue/* 在队列中执行 */
 
     /**
      * @param mixed $message
-     * @param int $workerId
+     * @param int $dstWorkerId
      */
     public function __construct($message, $dstWorkerId)
     {
         $this->message = $message;
-        $this->dstWorkerId;
+        $this->dstWorkerId = $dstWorkerId;
     }
 
     /**

@@ -8,7 +8,7 @@ namespace Flysion\Swoolaravel\Swoole\WebSocket;
  */
 class Server extends \Swoole\WebSocket\Server
 {
-    use \Flysion\Swoolaravel\Server;
+    use \Flysion\Swoolaravel\Swoole\ServerTrait;
 
     /**
      * @param \Illuminate\Events\Dispatcher|null $events

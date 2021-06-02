@@ -13,7 +13,7 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/http_server?id=httprequest \Swoole\Http\Request
  * @link https://wiki.swoole.com/#/http_server?id=httpresponse \Swoole\Http\Response
  */
-class HandShake
+class HandShake implements SwooleEvent
 {
     /**
      * @var \Swoole\Http\Request

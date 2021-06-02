@@ -9,7 +9,7 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/websocket_server?id=onopen onOpen
  * @link https://wiki.swoole.com/#/http_server?id=httprequest \Swoole\Http\Request
  */
-class Open
+class Open implements SwooleEvent
 {
     /**
      * @var \Swoole\WebSocket\Server

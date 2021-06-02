@@ -11,7 +11,7 @@ namespace Flysion\Swoolaravel\Events;
  *
  * @link https://wiki.swoole.com/#/server/events?id=onworkerstop onWorkerStop
  */
-class WorkerStop
+class WorkerStop implements SwooleEvent
 {
     /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server

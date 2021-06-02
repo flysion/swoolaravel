@@ -12,7 +12,7 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/server/events?id=onpacket onPacket
  * @link https://wiki.swoole.com/#/start/start_udp_server UDP 服务器
  */
-class Packet
+class Packet implements SwooleEvent
 {
     /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server

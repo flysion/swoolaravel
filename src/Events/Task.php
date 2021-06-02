@@ -17,7 +17,7 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/server/methods?id=task 任务投递
  * @see \Flysion\Swoolaravel\Swoole\Server|\Flysion\Swoolaravel\Swoole\Http\Server|\Flysion\Swoolaravel\Swoole\WebSocket\Server\Task
  */
-class Task
+class Task implements SwooleEvent
 {
     /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server

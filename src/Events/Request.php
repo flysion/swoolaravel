@@ -21,7 +21,7 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/http_server?id=httprequest \Swoole\Http\Request
  * @link https://wiki.swoole.com/#/http_server?id=httpresponse \Swoole\Http\Response
  */
-class Request
+class Request implements SwooleEvent
 {
     /**
      * @var \Swoole\Http\Request

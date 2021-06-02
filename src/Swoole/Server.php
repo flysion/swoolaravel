@@ -23,7 +23,7 @@ use Flysion\Swoolaravel\Events\WorkerStart;
  */
 class Server extends \Swoole\Server
 {
-    use \Flysion\Swoolaravel\Server;
+    use \Flysion\Swoolaravel\Swoole\ServerTrait;
 
     /**
      * @param \Illuminate\Events\Dispatcher|null $events

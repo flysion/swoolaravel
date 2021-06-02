@@ -11,7 +11,7 @@ namespace Flysion\Swoolaravel\Events;
  *
  * @link https://wiki.swoole.com/#/server/events?id=onfinish onFinish
  */
-class Finish
+class Finish implements SwooleEvent
 {
     /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server

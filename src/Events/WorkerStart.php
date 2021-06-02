@@ -15,7 +15,7 @@ namespace Flysion\Swoolaravel\Events;
  *
  * @link https://wiki.swoole.com/#/server/events?id=onshutdown onShutdown
  */
-class WorkerStart
+class WorkerStart implements SwooleEvent
 {
     /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server

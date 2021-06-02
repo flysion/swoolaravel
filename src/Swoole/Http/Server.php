@@ -13,14 +13,7 @@ namespace Flysion\Swoolaravel\Swoole\Http;
  */
 class Server extends \Swoole\Http\Server
 {
-    use \Flysion\Swoolaravel\Server;
-
-    /**
-     * 是否打开 http 协议
-     *
-     * @var bool
-     */
-    public $openHttpProtocol = true;
+    use \Flysion\Swoolaravel\Swoole\ServerTrait, \Flysion\Swoolaravel\Swoole\EnableHttp;
 
     /**
      * @param \Illuminate\Events\Dispatcher|null $events

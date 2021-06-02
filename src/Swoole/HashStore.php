@@ -16,12 +16,12 @@ class HashStore
 
     /**
      * @param array $columns
-     * @param null|float $conflict_proportion
+     * @param null|float $conflictProportion
      * @throws
      */
-    public function __construct(array $columns, $conflict_proportion = null)
+    public function __construct(array $columns, $conflictProportion = null)
     {
-        $this->data = new \Swoole\Table(1, $conflict_proportion);
+        $this->data = new \Swoole\Table(1, $conflictProportion);
 
         foreach($columns as $name => list($dataType, $length))
         {

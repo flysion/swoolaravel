@@ -1,10 +1,11 @@
 <?php
 
-namespace Flysion\Swoolaravel;
+namespace Flysion\Swoolaravel\Swoole;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
-trait Server
+trait ServerTrait
 {
     /**
      * 进程名称前缀
@@ -19,39 +20,62 @@ trait Server
     public $events;
 
     /**
-     * @param string $name
+     * @param string $eventName
      * @param callable[]|callable $listeners
      * @throws
      */
-    public function on($name, $listeners)
+    public function on($eventName, $listeners)
     {
-        if(strpos($name, ':') > 0) {
-            list($eventName, $_) = explode(':', $name, 2);
-        } else {
-            $eventName = $name;
-        }
-
         $class = \Flysion\Swoolaravel\events[$eventName];
 
         parent::on($eventName, function(...$arguments) use($eventName, $class) {
             $event = new $class(...$arguments);
 
-            try {
-                if ($this->onBefore($eventName, $event) === false) {
-                    return;
-                }
-
-                $this->events->dispatch($eventName, [$this, $event]);
-
-                $this->onAfter($eventName, $event);
-            } catch (\Exception $e) {
-                report($e);
+            $result = $this->onBefore($eventName, $event);
+            if ($result === false) {
+                return;
             }
+
+            $this->events->dispatch($eventName, is_null($result) ? [$this, $event] : [$this, $event, $result]);
+
+            $this->onAfter($eventName, $event);
         });
 
         foreach(Arr::wrap($listeners) as $listener)
         {
-            $this->events->listen($name, $listener);
+            $this->events->listen($eventName, $listener);
+        }
+    }
+
+    /**
+     * @param string $name
+     * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
+     * @return void|false
+     * @throws
+     */
+    final protected function onBefore($name, $event)
+    {
+        $before = 'on' . ucfirst($name) . 'Before';
+
+        if(method_exists($this, $before))
+        {
+            return $this->{$before}($event);
+        }
+    }
+
+    /**
+     * @param string $name
+     * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
+     * @return void|false
+     * @throws
+     */
+    final protected function onAfter($name, $event)
+    {
+        $after = 'on' . ucfirst($name) . 'After';
+
+        if(method_exists($this, $after))
+        {
+            $this->{$after}($event);
         }
     }
 
@@ -60,7 +84,7 @@ trait Server
      *
      * @param \Flysion\Swoolaravel\Events\Start $event
      */
-    protected function onBeforeStart(\Flysion\Swoolaravel\Events\Start $event)
+    protected function onStartBefore(\Flysion\Swoolaravel\Events\Start $event)
     {
         if($this->processNamePrefix)
         {
@@ -73,7 +97,7 @@ trait Server
      *
      * @param \Flysion\Swoolaravel\Events\ManagerStart $event
      */
-    protected function onBeforeManagerStart(\Flysion\Swoolaravel\Events\ManagerStart $event)
+    protected function onManagerStartBefore(\Flysion\Swoolaravel\Events\ManagerStart $event)
     {
         if($this->processNamePrefix)
         {
@@ -86,7 +110,7 @@ trait Server
      *
      * @param \Flysion\Swoolaravel\Events\WorkerStart $event
      */
-    protected function onBeforeWorkerStart(\Flysion\Swoolaravel\Events\WorkerStart $event)
+    protected function onWorkerStartBefore(\Flysion\Swoolaravel\Events\WorkerStart $event)
     {
         // 设置工作进程名称
 
@@ -103,87 +127,67 @@ trait Server
 
         $app = require base_path('/bootstrap/app.php');
         $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+        $app->instance('server', $this);
 
         // 重新注册 app 实例，通过 app() 方法可获取该实例
 
         \Illuminate\Foundation\Application::setInstance($app);
-
-        $app->instance('server', $this);
     }
 
     /**
-     * @param string $name
-     * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
-     * @return void|false
-     * @throws
+     * 最大 worker_id
+     *
+     * @return int
      */
-    final protected function onBefore($name, $event)
+    public function maxWorkerId()
     {
-        $before = 'onBefore' . ucfirst($name);
-
-        if(method_exists($this, $before))
-        {
-            if($this->{$before}($event) === false) {
-                return false;
-            }
-        }
-
-        //
-
-        $this->events->dispatch("{$name}:before", [$this, $event]);
+        return max(0, $this->setting['worker_num'] - 1);
     }
 
     /**
-     * 工作进程
+     * @return mixed
+     */
+    public function minTaskWorkerId()
+    {
+        return max(0, $this->setting['worker_num']);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function maxTaskWorkerId()
+    {
+        return max(0, $this->setting['worker_num'] + $this->setting['task_worker_num'] - 1);
+    }
+
+    /**
+     * 工作 worker
      *
      * @return int[]
      */
     public function workers()
     {
-        return range(0, max(0, @$this->setting['work_num'] - 1));
+        return range(0, $this->maxWorkerId());
     }
 
     /**
-     * task worker 进程
+     * task worker
      *
      * @return int[]
      */
     public function taskWorkers()
     {
-        return range(
-            max(0, @$this->setting['work_num'] - 1),
-            max(0, @$this->setting['worker_num'] + @$this->setting['task_worker_num'] - 1)
-        );
+        return range($this->minTaskWorkerId(), $this->maxTaskWorkerId());
     }
 
     /**
-     * 所有 worker 进程
+     * all worker
      *
      * @return int[]
      */
     public function allWorkers()
     {
-        return range(0, max(0, @$this->setting['worker_num'] + @$this->setting['task_worker_num'] - 1));
-    }
-
-    /**
-     * @param string $name
-     * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
-     * @return void|false
-     * @throws
-     */
-    final protected function onAfter($name, $event)
-    {
-        $after = 'onAfter' . ucfirst($name);
-
-        if(method_exists($this, $after))
-        {
-            $this->{$after}($event);
-        }
-
-        //
-
-        $this->events->dispatch("{$name}:after", [$this, $event]);
+        return range(0, $this->maxTaskWorkerId());
     }
 
     /**
@@ -202,50 +206,51 @@ trait Server
      * 在 start 前执行
      *
      * @param array $setting
-     * @param mixed[] $arguments
      */
-    protected function boot(&$setting, ...$arguments)
+    protected function bootstrap(&$setting)
     {
 
     }
 
     /**
      * @param array $setting
-     * @param mixed[] $arguments
      * @return mixed
      * @throws
      */
-    public function start($setting = [], ...$arguments)
+    public function start($setting = [])
     {
-        $this->boot($setting, ...$arguments);
+        foreach(get_class_methods($this) as $methodName)
+        {
+            $str = Str::snake($methodName);
 
-        //
-
-        $setting = array_merge(
-            $this->setting ?? [],
-            $this->setting($setting),
-            ['task_use_object' => false]
-        );
-
-        if($this->openHttpProtocol) {
-            $setting['open_http_protocol'] = true;
-            $this->on('request', \Flysion\Swoolaravel\Listeners\RequestToLaravel::class);
+            if(Str::startsWith($str, 'boot_') && Str::endsWith($str, '_strap'))
+            {
+                $this->{$methodName}($setting);
+            }
         }
 
-        $this->set($setting);
+        $this->bootstrap($setting);
 
         //
 
         foreach(\Flysion\Swoolaravel\events as $name => $class)
         {
-            $beforeMethod = 'onBefore' . ucfirst($name);
-            $afterMethod = 'onAfter'. ucfirst($name);
+            $beforeMethod = 'on' . ucfirst($name) . 'Before';
+            $afterMethod = 'on'. ucfirst($name) . 'After';
 
             if(method_exists($this, $beforeMethod) || method_exists($this, $afterMethod))
             {
                 $this->on($name, null);
             }
         }
+
+        //
+
+        $this->set(array_merge(
+            $this->setting ?? [],
+            $this->setting($setting),
+            ['task_use_object' => false]
+        ));
 
         //
 

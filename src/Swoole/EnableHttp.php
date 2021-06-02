@@ -1,15 +1,32 @@
 <?php
 
-namespace Flysion\Swoolaravel\Listeners;
+namespace Flysion\Swoolaravel\Swoole;
 
-class RequestToLaravel
+/**
+ * @mixin \Flysion\Swoolaravel\Swoole\Server
+ * @mixin \Flysion\Swoolaravel\Swoole\Http\Server
+ * @mixin \Flysion\Swoolaravel\Swoole\WebSocket\Server
+ */
+trait EnableHttp
 {
+    /**
+     * @param array $setting
+     */
+    protected function bootEnableHttpStrap(&$setting)
+    {
+        $setting['open_http_protocol'] = true;
+
+        $this->on('request', function($server, \Flysion\Swoolaravel\Events\Request $event) {
+            return $this->requestToLaravel($server, $event);
+        });
+    }
+
     /**
      * @param \Flysion\Swoolaravel\Swoole\Http\Server|\Flysion\Swoolaravel\Swoole\WebSocket\Server $server
      * @param \Flysion\Swoolaravel\Events\Request $event
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws
      */
-    public function handle($server, \Flysion\Swoolaravel\Events\Request $event)
+    protected function requestToLaravel($server, \Flysion\Swoolaravel\Events\Request $event)
     {
         /**
          * @var \Illuminate\Foundation\Http\Kernel $kernel

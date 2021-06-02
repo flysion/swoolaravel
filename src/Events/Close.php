@@ -21,7 +21,7 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/server/events?id=onclose onClose
  * @link https://wiki.swoole.com/#/server/setting?id=heartbeat_check_interval 心跳检测
  */
-class Close
+class Close implements SwooleEvent
 {
     /**
      * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server

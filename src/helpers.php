@@ -72,16 +72,6 @@ function swoole_request_to_laravel_request(\Swoole\Http\Request $request) : \Ill
 }
 
 /**
- * 应用程序是否运行在 swoole 里
- *
- * @return bool
- */
-function running_in_swoole()
-{
-    return env('APP_RUNNING_IN_SWOOLE');
-}
-
-/**
  * 通过 class 注释中的"@property"解析属性列表，用于创建一个 \Swoole\Table
  *
  * @see \Swoole\Table
@@ -114,4 +104,14 @@ function parse_class_property_to_table_column($class)
     }
 
     return $fields;
+}
+
+/**
+ * 应用程序是否运行在 swoole 里
+ *
+ * @return bool
+ */
+function running_in_swoole()
+{
+    return env('APP_RUNNING_IN_SWOOLE');
 }

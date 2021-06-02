@@ -10,7 +10,7 @@ namespace Flysion\Swoolaravel\Events;
  * @link https://wiki.swoole.com/#/websocket_server?id=onmessage onMessage
  * @link https://wiki.swoole.com/#/websocket_server?id=swoolewebsocketframe \Swoole\WebSocket\Frame
  */
-class Message
+class Message implements SwooleEvent
 {
     /**
      * @var \Swoole\WebSocket\Server
