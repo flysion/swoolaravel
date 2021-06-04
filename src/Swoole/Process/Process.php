@@ -27,6 +27,19 @@ abstract class Process extends \Swoole\Process
      */
     protected function _handle()
     {
+        // 加载一个新的app替换老的app
+        // 这里主要作用是重置框架里的一些东西（清除容器）
+
+        $app = require base_path('/bootstrap/app.php');
+        $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+        $app->instance('server', $this);
+
+        // 重新注册 app 实例，通过 app() 方法可获取该实例
+
+        \Illuminate\Foundation\Application::setInstance($app);
+
+        //
+
         $this->onStart();
         $this->handle();
     }
