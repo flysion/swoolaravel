@@ -23,22 +23,14 @@ class QueueWorker extends Process
     protected $workerOptions;
 
     /**
-     * 在启动进程前调用
-     *
-     * @var callable
-     */
-    protected $onStart;
-
-    /**
      * @param string $connection
      * @param string $queue
      * @param \Illuminate\Queue\WorkerOptions $workerOptions
-     * @param callable|null $onStart
      * @param bool $redirect_stdin_and_stdout
      * @param int $pipe_type
      * @param bool $enable_coroutine
      */
-    public function __construct($connection, $queue, $workerOptions, $onStart = null, $redirect_stdin_and_stdout = false, $pipe_type = SOCK_DGRAM, $enable_coroutine = false)
+    public function __construct($connection, $queue, $workerOptions, $redirect_stdin_and_stdout = false, $pipe_type = SOCK_DGRAM, $enable_coroutine = false)
     {
         parent::__construct(
             $redirect_stdin_and_stdout,
@@ -49,7 +41,6 @@ class QueueWorker extends Process
         $this->connection = $connection;
         $this->queue = $queue;
         $this->workerOptions = $workerOptions;
-        $this->onStart = $onStart;
     }
 
     /**
@@ -80,16 +71,6 @@ class QueueWorker extends Process
             } catch (\Exception $e) {
                 report($e);
             }
-        }
-    }
-
-    /**
-     *
-     */
-    protected function onStart()
-    {
-        if(is_callable($this->onStart)) {
-            call_user_func_array($this->onStart, [$this]);
         }
     }
 }

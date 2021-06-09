@@ -128,10 +128,6 @@ trait ServerTrait
         $app = require base_path('/bootstrap/app.php');
         $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
         $app->instance('server', $this);
-
-        // 重新注册 app 实例，通过 app() 方法可获取该实例
-
-        \Illuminate\Foundation\Application::setInstance($app);
     }
 
     /**
@@ -255,10 +251,8 @@ trait ServerTrait
         //
 
         putenv('APP_RUNNING_IN_SWOOLE=TRUE');
-
         app()->instance('server', $this);
         $result = parent::start();
-
         putenv('APP_RUNNING_IN_SWOOLE=FALSE');
 
         return $result;

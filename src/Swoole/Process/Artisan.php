@@ -22,13 +22,6 @@ class Artisan extends Process
     protected $outputBuffer;
 
     /**
-     * 在启动进程前调用
-     *
-     * @var callable
-     */
-    protected $onStart;
-
-    /**
      * @param string $command
      * @param array $parameters
      * @param \Symfony\Component\Console\Output\OutputInterface|null $outputBuffer
@@ -37,7 +30,7 @@ class Artisan extends Process
      * @param int $pipe_type
      * @param bool $enable_coroutine
      */
-    public function __construct($command, $parameters, $outputBuffer, $onStart = null, $redirect_stdin_and_stdout = false, $pipe_type = SOCK_DGRAM, $enable_coroutine = false)
+    public function __construct($command, $parameters, $outputBuffer, $redirect_stdin_and_stdout = false, $pipe_type = SOCK_DGRAM, $enable_coroutine = false)
     {
         parent::__construct(
             $redirect_stdin_and_stdout,
@@ -48,17 +41,6 @@ class Artisan extends Process
         $this->command = $command;
         $this->parameters = $parameters;
         $this->outputBuffer = $outputBuffer;
-        $this->onStart = $onStart;
-    }
-
-    /**
-     *
-     */
-    protected function onStart()
-    {
-        if(is_callable($this->onStart)) {
-            call_user_func_array($this->onStart, [$this]);
-        }
     }
 
     /**

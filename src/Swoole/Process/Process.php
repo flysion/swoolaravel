@@ -8,6 +8,11 @@ namespace Flysion\Swoolaravel\Swoole\Process;
 abstract class Process extends \Swoole\Process
 {
     /**
+     * @var null|string
+     */
+    protected $processName = null;
+
+    /**
      * @param bool $redirect_stdin_and_stdout
      * @param int $pipe_type
      * @param bool $enable_coroutine
@@ -15,7 +20,7 @@ abstract class Process extends \Swoole\Process
     public function __construct($redirect_stdin_and_stdout = false, $pipe_type = SOCK_DGRAM, $enable_coroutine = false)
     {
         parent::__construct(
-            function() { $this->_handle(); },
+            function() { $this->main(); },
             $redirect_stdin_and_stdout,
             $pipe_type,
             $enable_coroutine
@@ -25,35 +30,38 @@ abstract class Process extends \Swoole\Process
     /**
      *
      */
-    protected function _handle()
+    protected function main()
     {
+        if(!is_null($this->processName)) {
+            $this->name($this->processName);
+        }
+
         // 加载一个新的app替换老的app
         // 这里主要作用是重置框架里的一些东西（清除容器）
 
+        $server = app('server');
+
         $app = require base_path('/bootstrap/app.php');
         $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-        $app->instance('server', $this);
-
-        // 重新注册 app 实例，通过 app() 方法可获取该实例
-
-        \Illuminate\Foundation\Application::setInstance($app);
+        $app->instance('server', $server);
 
         //
 
-        $this->onStart();
         $this->handle();
     }
 
     /**
-     * @return mixed
+     * @param string $processName
+     * @return static
      */
-    abstract public function handle();
+    public function setProcessName($processName)
+    {
+        $this->processName = $processName;
+        return $this;
+    }
 
     /**
-     *
+     * @return void
      */
-    protected function onStart()
-    {
-
-    }
+    abstract public function handle();
 }
