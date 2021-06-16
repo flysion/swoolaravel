@@ -50,27 +50,65 @@ class QueueWorker extends Process
      */
     public function handle()
     {
-        $quit = false;
-
-        // 在 shutdown 关闭服务器时，会向用户进程发送 SIGTERM 信号，关闭用户进程
-        pcntl_signal(SIGTERM/*15*/, function($signo) use(&$quit) {
-            $quit = true;
-
-        });
+        app('events')->listen(\Illuminate\Queue\Events\JobProcessing::class, [$this, 'onJobProcessing']);
+        app('events')->listen(\Illuminate\Queue\Events\JobProcessed::class, [$this, 'onJobProcessed']);
+        app('events')->listen(\Illuminate\Queue\Events\JobFailed::class, [$this, 'onJobFailed']);
+        app('events')->listen(\Illuminate\Queue\Events\JobExceptionOccurred::class, [$this, 'onJobExceptionOccurred']);
+        app('events')->listen(\Illuminate\Queue\Events\Looping::class, [$this, 'onLooping']);
+        app('events')->listen(\Illuminate\Queue\Events\WorkerStopping::class, [$this, 'onWorkerStopping']);
 
         /**
          * @var \Illuminate\Queue\Worker $queue
          */
         $queue = app('queue.worker');
+        $queue->daemon($this->connection, $this->queue, $this->workerOptions);
+    }
 
-        while(!$quit) {
-            pcntl_signal_dispatch();
+    /**
+     * @param \Illuminate\Queue\Events\JobProcessing $event
+     */
+    public function onJobProcessing(\Illuminate\Queue\Events\JobProcessing $event)
+    {
 
-            try {
-                $queue->runNextJob($this->connection, $this->queue, $this->workerOptions);
-            } catch (\Exception $e) {
-                report($e);
-            }
-        }
+    }
+
+    /**
+     * @param \Illuminate\Queue\Events\JobProcessed $event
+     */
+    public function onJobProcessed(\Illuminate\Queue\Events\JobProcessed $event)
+    {
+
+    }
+
+    /**
+     * @param \Illuminate\Queue\Events\JobFailed $event
+     */
+    public function onJobFailed(\Illuminate\Queue\Events\JobFailed $event)
+    {
+
+    }
+
+    /**
+     * @param \Illuminate\Queue\Events\JobExceptionOccurred $event
+     */
+    public function onJobExceptionOccurred(\Illuminate\Queue\Events\JobExceptionOccurred $event)
+    {
+
+    }
+
+    /**
+     * @param \Illuminate\Queue\Events\Looping $event
+     */
+    public function onLooping(\Illuminate\Queue\Events\Looping $event)
+    {
+
+    }
+
+    /**
+     * @param \Illuminate\Queue\Events\WorkerStopping $event
+     */
+    public function onWorkerStopping(\Illuminate\Queue\Events\WorkerStopping $event)
+    {
+
     }
 }

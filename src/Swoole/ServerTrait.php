@@ -17,7 +17,25 @@ trait ServerTrait
     /**
      * @var \Illuminate\Events\Dispatcher
      */
-    public $events;
+    private $events;
+
+    /**
+     * @return \Illuminate\Events\Dispatcher
+     */
+    protected function createEvents()
+    {
+        return (new \Illuminate\Events\Dispatcher())->setQueueResolver(function () {
+            return app()->make(\Illuminate\Contracts\Queue\Factory::class);
+        });
+    }
+
+    /**
+     * @return \Illuminate\Events\Dispatcher
+     */
+    public function events()
+    {
+        return $this->events = $this->events ?? $this->createEvents();
+    }
 
     /**
      * @param string $eventName
@@ -36,14 +54,14 @@ trait ServerTrait
                 return;
             }
 
-            $this->events->dispatch($eventName, is_null($result) ? [$this, $event] : [$this, $event, $result]);
+            $this->events()->dispatch($eventName, is_null($result) ? [$this, $event] : [$this, $event, $result]);
 
             $this->onAfter($eventName, $event);
         });
 
         foreach(Arr::wrap($listeners) as $listener)
         {
-            $this->events->listen($eventName, $listener);
+            $this->events()->listen($eventName, $listener);
         }
     }
 

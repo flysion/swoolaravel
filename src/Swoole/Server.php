@@ -35,14 +35,6 @@ class Server extends \Swoole\Server
     public function __construct($events = null, $host = '0.0.0.0', $port = 0, $mode = SWOOLE_PROCESS, $sockType = SWOOLE_SOCK_TCP)
     {
         parent::__construct($host, $port, $mode, $sockType);
-        $this->events = $events ?? $this->createEvents();
-    }
-
-    /**
-     * @return \Illuminate\Events\Dispatcher
-     */
-    protected function createEvents()
-    {
-        return app('events');
+        $this->events = $events;
     }
 }

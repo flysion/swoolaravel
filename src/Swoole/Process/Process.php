@@ -13,6 +13,11 @@ abstract class Process extends \Swoole\Process
     protected $processName = null;
 
     /**
+     * @var array
+     */
+    protected $callbacks = [];
+
+    /**
      * @param bool $redirect_stdin_and_stdout
      * @param int $pipe_type
      * @param bool $enable_coroutine
@@ -44,6 +49,7 @@ abstract class Process extends \Swoole\Process
         $app = require base_path('/bootstrap/app.php');
         $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
         $app->instance('server', $server);
+        $app->instance('process', $this);
 
         //
 
@@ -57,7 +63,34 @@ abstract class Process extends \Swoole\Process
     public function setProcessName($processName)
     {
         $this->processName = $processName;
+
         return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param callable $callback
+     * @return static
+     */
+    public function on($name, $callback)
+    {
+        $this->callbacks['on' . strtolower($name)] = $callback;
+
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param mixed $arguments
+     * @return mixed
+     */
+    protected function trigger($name, ...$arguments)
+    {
+        if(isset($this->callbacks[$name])) {
+            return [true, call_user_func($this->callbacks[$name], $this, ...$arguments)];
+        }
+
+        return [false, null];
     }
 
     /**
