@@ -74,7 +74,7 @@ abstract class Process extends \Swoole\Process
      */
     public function on($name, $callback)
     {
-        $this->callbacks['on' . strtolower($name)] = $callback;
+        $this->callbacks['on' . $name] = $callback;
 
         return $this;
     }

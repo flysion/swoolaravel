@@ -149,57 +149,81 @@ trait ServerTrait
     }
 
     /**
-     * 最大 worker_id
-     *
-     * @return int
+     * @return int|false
      */
-    public function maxWorkerId()
+    public function minJobWorkerId()
     {
-        return max(0, $this->setting['worker_num'] - 1);
+        if($this->setting['worker_num'] <= 0) {
+            return false;
+        }
+
+        return 0;
     }
 
     /**
-     * @return mixed
+     * @return int|false
+     */
+    public function maxJobWorkerId()
+    {
+        if($this->setting['worker_num'] <= 0) {
+            return false;
+        }
+
+        return $this->setting['worker_num'] - 1;
+    }
+
+    /**
+     * @return int|false
      */
     public function minTaskWorkerId()
     {
-        return max(0, $this->setting['worker_num']);
+        if($this->setting['task_worker_num'] <= 0) {
+            return false;
+        }
+
+        return $this->setting['worker_num'];
     }
 
     /**
-     * @return mixed
+     * @return int|false
      */
     public function maxTaskWorkerId()
     {
-        return max(0, $this->setting['worker_num'] + $this->setting['task_worker_num'] - 1);
+        if($this->setting['task_worker_num'] <= 0) {
+            return false;
+        }
+
+        return $this->setting['worker_num'] + $this->setting['task_worker_num'] - 1;
     }
 
     /**
-     * 工作 worker
-     *
      * @return int[]
      */
-    public function workers()
+    public function jobWorkers()
     {
+        if($this->setting['worker_num'] <= 0) {
+            return [];
+        }
+
         return range(0, $this->maxWorkerId());
     }
 
     /**
-     * task worker
-     *
      * @return int[]
      */
     public function taskWorkers()
     {
+        if($this->setting['task_worker_num'] <= 0) {
+            return [];
+        }
+
         return range($this->minTaskWorkerId(), $this->maxTaskWorkerId());
     }
 
     /**
-     * all worker
-     *
      * @return int[]
      */
-    public function allWorkers()
+    public function workers()
     {
         return range(0, $this->maxTaskWorkerId());
     }

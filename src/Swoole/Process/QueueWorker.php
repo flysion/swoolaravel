@@ -61,7 +61,12 @@ class QueueWorker extends Process
          * @var \Illuminate\Queue\Worker $queue
          */
         $queue = app('queue.worker');
-        $queue->daemon($this->connection, $this->queue, $this->workerOptions);
+
+        try {
+            $queue->daemon($this->connection, $this->queue, $this->workerOptions);
+        } catch (\Swoole\ExitException $e) {
+            return ;
+        }
     }
 
     /**
@@ -69,7 +74,7 @@ class QueueWorker extends Process
      */
     public function onJobProcessing(\Illuminate\Queue\Events\JobProcessing $event)
     {
-
+        $this->trigger('onJobProcessing', $event);
     }
 
     /**
@@ -77,7 +82,7 @@ class QueueWorker extends Process
      */
     public function onJobProcessed(\Illuminate\Queue\Events\JobProcessed $event)
     {
-
+        $this->trigger('onJobProcessed', $event);
     }
 
     /**
@@ -85,7 +90,7 @@ class QueueWorker extends Process
      */
     public function onJobFailed(\Illuminate\Queue\Events\JobFailed $event)
     {
-
+        $this->trigger('onJobFailed', $event);
     }
 
     /**
@@ -93,7 +98,7 @@ class QueueWorker extends Process
      */
     public function onJobExceptionOccurred(\Illuminate\Queue\Events\JobExceptionOccurred $event)
     {
-
+        $this->trigger('onJobExceptionOccurred', $event);
     }
 
     /**
@@ -101,7 +106,7 @@ class QueueWorker extends Process
      */
     public function onLooping(\Illuminate\Queue\Events\Looping $event)
     {
-
+        $this->trigger('onLooping', $event);
     }
 
     /**
@@ -109,6 +114,6 @@ class QueueWorker extends Process
      */
     public function onWorkerStopping(\Illuminate\Queue\Events\WorkerStopping $event)
     {
-
+        $this->trigger('onWorkerStopping', $event);
     }
 }
