@@ -51,8 +51,6 @@ abstract class Process extends \Swoole\Process
         $app->instance('server', $server);
         $app->instance('process', $this);
 
-        //
-
         $this->handle();
     }
 
