@@ -50,13 +50,6 @@ class QueueWorker extends Process
      */
     public function handle()
     {
-        app('events')->listen(\Illuminate\Queue\Events\JobProcessing::class, [$this, 'onJobProcessing']);
-        app('events')->listen(\Illuminate\Queue\Events\JobProcessed::class, [$this, 'onJobProcessed']);
-        app('events')->listen(\Illuminate\Queue\Events\JobFailed::class, [$this, 'onJobFailed']);
-        app('events')->listen(\Illuminate\Queue\Events\JobExceptionOccurred::class, [$this, 'onJobExceptionOccurred']);
-        app('events')->listen(\Illuminate\Queue\Events\Looping::class, [$this, 'onLooping']);
-        app('events')->listen(\Illuminate\Queue\Events\WorkerStopping::class, [$this, 'onWorkerStopping']);
-
         /**
          * @var \Illuminate\Queue\Worker $queue
          */
@@ -67,53 +60,5 @@ class QueueWorker extends Process
         } catch (\Swoole\ExitException $e) {
             return ;
         }
-    }
-
-    /**
-     * @param \Illuminate\Queue\Events\JobProcessing $event
-     */
-    public function onJobProcessing(\Illuminate\Queue\Events\JobProcessing $event)
-    {
-        $this->trigger('onJobProcessing', $event);
-    }
-
-    /**
-     * @param \Illuminate\Queue\Events\JobProcessed $event
-     */
-    public function onJobProcessed(\Illuminate\Queue\Events\JobProcessed $event)
-    {
-        $this->trigger('onJobProcessed', $event);
-    }
-
-    /**
-     * @param \Illuminate\Queue\Events\JobFailed $event
-     */
-    public function onJobFailed(\Illuminate\Queue\Events\JobFailed $event)
-    {
-        $this->trigger('onJobFailed', $event);
-    }
-
-    /**
-     * @param \Illuminate\Queue\Events\JobExceptionOccurred $event
-     */
-    public function onJobExceptionOccurred(\Illuminate\Queue\Events\JobExceptionOccurred $event)
-    {
-        $this->trigger('onJobExceptionOccurred', $event);
-    }
-
-    /**
-     * @param \Illuminate\Queue\Events\Looping $event
-     */
-    public function onLooping(\Illuminate\Queue\Events\Looping $event)
-    {
-        $this->trigger('onLooping', $event);
-    }
-
-    /**
-     * @param \Illuminate\Queue\Events\WorkerStopping $event
-     */
-    public function onWorkerStopping(\Illuminate\Queue\Events\WorkerStopping $event)
-    {
-        $this->trigger('onWorkerStopping', $event);
     }
 }
