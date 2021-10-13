@@ -44,16 +44,20 @@ trait ServerTrait
         $className = \Flysion\Swoolaravel\events[$eventName];
 
         parent::on($eventName, function() use($eventName, $className) {
-            $event = new $className(...func_get_args());
+            try {
+                $event = new $className(...func_get_args());
 
-            $result = $this->onBefore($eventName, $event);
-            if ($result === false) {
-                return;
+                $result = $this->onBefore($eventName, $event);
+                if ($result === false) {
+                    return;
+                }
+
+                $this->events()->dispatch($eventName, is_null($result) ? [$this, $event] : [$this, $event, $result]);
+
+                $this->onAfter($eventName, $event);
+            } catch (\Exception $e) {
+                report($e);
             }
-
-            $this->events()->dispatch($eventName, is_null($result) ? [$this, $event] : [$this, $event, $result]);
-
-            $this->onAfter($eventName, $event);
         });
 
         $this->swooleEvents[$eventName] = true;
