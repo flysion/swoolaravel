@@ -3,21 +3,18 @@
 namespace Flysion\Swoolaravel\Swoole;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 trait ServerTrait
 {
     /**
-     * 进程名称前缀
-     *
-     * @var string
-     */
-    public $processNamePrefix = 'swoolaravel';
-
-    /**
      * @var \Illuminate\Events\Dispatcher
      */
-    private $events;
+    protected $events;
+
+    /**
+     * @var array
+     */
+    protected $swooleEvents = [];
 
     /**
      * @return \Illuminate\Events\Dispatcher
@@ -39,15 +36,15 @@ trait ServerTrait
 
     /**
      * @param string $eventName
-     * @param callable[]|callable $listeners
-     * @throws
      */
-    public function on($eventName, $listeners)
+    protected function enableEvent($eventName)
     {
-        $class = \Flysion\Swoolaravel\events[$eventName];
+        if (isset($this->swooleEvents[$eventName])) return;
 
-        parent::on($eventName, function(...$arguments) use($eventName, $class) {
-            $event = new $class(...$arguments);
+        $className = \Flysion\Swoolaravel\events[$eventName];
+
+        parent::on($eventName, function() use($eventName, $className) {
+            $event = new $className(...func_get_args());
 
             $result = $this->onBefore($eventName, $event);
             if ($result === false) {
@@ -58,6 +55,18 @@ trait ServerTrait
 
             $this->onAfter($eventName, $event);
         });
+
+        $this->swooleEvents[$eventName] = true;
+    }
+
+    /**
+     * @param string $eventName
+     * @param callable[]|callable $listeners
+     * @throws
+     */
+    public function on($eventName, $listeners)
+    {
+        $this->enableEvent($eventName);
 
         foreach(Arr::wrap($listeners) as $listener)
         {
@@ -73,11 +82,11 @@ trait ServerTrait
      */
     final protected function onBefore($name, $event)
     {
-        $before = 'on' . ucfirst($name) . 'Before';
+        $method = 'on' . ucfirst($name) . 'Before';
 
-        if(method_exists($this, $before))
+        if(method_exists($this, $method))
         {
-            return $this->{$before}($event);
+            return $this->{$method}($event);
         }
     }
 
@@ -89,37 +98,11 @@ trait ServerTrait
      */
     final protected function onAfter($name, $event)
     {
-        $after = 'on' . ucfirst($name) . 'After';
+        $method = 'on' . ucfirst($name) . 'After';
 
-        if(method_exists($this, $after))
+        if(method_exists($this, $method))
         {
-            $this->{$after}($event);
-        }
-    }
-
-    /**
-     * 在触发用户的start事件之前执行
-     *
-     * @param \Flysion\Swoolaravel\Events\Start $event
-     */
-    protected function onStartBefore(\Flysion\Swoolaravel\Events\Start $event)
-    {
-        if($this->processNamePrefix)
-        {
-            \swoole_set_process_name("{$this->processNamePrefix}-master-{$this->master_pid}");
-        }
-    }
-
-    /**
-     * 在触发用户的managerstart事件之前执行
-     *
-     * @param \Flysion\Swoolaravel\Events\ManagerStart $event
-     */
-    protected function onManagerStartBefore(\Flysion\Swoolaravel\Events\ManagerStart $event)
-    {
-        if($this->processNamePrefix)
-        {
-            \swoole_set_process_name("{$this->processNamePrefix}-manager-{$this->manager_pid}");
+            $this->{$method}($event);
         }
     }
 
@@ -130,125 +113,90 @@ trait ServerTrait
      */
     protected function onWorkerStartBefore(\Flysion\Swoolaravel\Events\WorkerStart $event)
     {
-        // 设置工作进程名称
-
-        if($this->processNamePrefix) {
-            if ($this->taskworker) {
-                \swoole_set_process_name("{$this->processNamePrefix}-taskworker-{$this->worker_pid}-{$event->workerId}");
-            } else {
-                \swoole_set_process_name("{$this->processNamePrefix}-worker-{$this->worker_pid}-{$event->workerId}");
-            }
-        }
-
-        // 加载一个新的app替换老的app
-        // 这里主要作用是重置框架里的一些东西（清除容器）
-
         $app = require base_path('/bootstrap/app.php');
         $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
         $app->instance('server', $this);
     }
 
-    /**
-     * @return int|false
-     */
-    public function minJobWorkerId()
-    {
-        if($this->setting['worker_num'] <= 0) {
-            return false;
-        }
-
-        return 0;
-    }
-
-    /**
-     * @return int|false
-     */
-    public function maxJobWorkerId()
-    {
-        if($this->setting['worker_num'] <= 0) {
-            return false;
-        }
-
-        return $this->setting['worker_num'] - 1;
-    }
-
-    /**
-     * @return int|false
-     */
-    public function minTaskWorkerId()
-    {
-        if($this->setting['task_worker_num'] <= 0) {
-            return false;
-        }
-
-        return $this->setting['worker_num'];
-    }
-
-    /**
-     * @return int|false
-     */
-    public function maxTaskWorkerId()
-    {
-        if($this->setting['task_worker_num'] <= 0) {
-            return false;
-        }
-
-        return $this->setting['worker_num'] + $this->setting['task_worker_num'] - 1;
-    }
-
-    /**
-     * @return int[]
-     */
-    public function jobWorkers()
-    {
-        if($this->setting['worker_num'] <= 0) {
-            return [];
-        }
-
-        return range(0, $this->maxWorkerId());
-    }
-
-    /**
-     * @return int[]
-     */
-    public function taskWorkers()
-    {
-        if($this->setting['task_worker_num'] <= 0) {
-            return [];
-        }
-
-        return range($this->minTaskWorkerId(), $this->maxTaskWorkerId());
-    }
-
-    /**
-     * @return int[]
-     */
-    public function workers()
-    {
-        return range(0, $this->maxTaskWorkerId());
-    }
-
-    /**
-     * 获取服务配置
-     *
-     * @param array $setting start 方法传过来的服务配置
-     * @return array
-     */
-    protected function setting($setting)
-    {
-        return $setting;
-    }
-
-    /**
-     * 启动引导程序
-     * 在 start 前执行
-     *
-     * @param array $setting
-     */
-    protected function bootstrap(&$setting)
-    {
-
-    }
+//    /**
+//     * @return int|false
+//     */
+//    public function minJobWorkerId()
+//    {
+//        if($this->setting['worker_num'] <= 0) {
+//            return false;
+//        }
+//
+//        return 0;
+//    }
+//
+//    /**
+//     * @return int|false
+//     */
+//    public function maxJobWorkerId()
+//    {
+//        if($this->setting['worker_num'] <= 0) {
+//            return false;
+//        }
+//
+//        return $this->setting['worker_num'] - 1;
+//    }
+//
+//    /**
+//     * @return int|false
+//     */
+//    public function minTaskWorkerId()
+//    {
+//        if($this->setting['task_worker_num'] <= 0) {
+//            return false;
+//        }
+//
+//        return $this->setting['worker_num'];
+//    }
+//
+//    /**
+//     * @return int|false
+//     */
+//    public function maxTaskWorkerId()
+//    {
+//        if($this->setting['task_worker_num'] <= 0) {
+//            return false;
+//        }
+//
+//        return $this->setting['worker_num'] + $this->setting['task_worker_num'] - 1;
+//    }
+//
+//    /**
+//     * @return int[]
+//     */
+//    public function jobWorkers()
+//    {
+//        if($this->setting['worker_num'] <= 0) {
+//            return [];
+//        }
+//
+//        return range(0, $this->maxWorkerId());
+//    }
+//
+//    /**
+//     * @return int[]
+//     */
+//    public function taskWorkers()
+//    {
+//        if($this->setting['task_worker_num'] <= 0) {
+//            return [];
+//        }
+//
+//        return range($this->minTaskWorkerId(), $this->maxTaskWorkerId());
+//    }
+//
+//    /**
+//     * @return int[]
+//     */
+//    public function workers()
+//    {
+//        return range(0, $this->maxTaskWorkerId());
+//    }
 
     /**
      * @param array $setting
@@ -257,20 +205,6 @@ trait ServerTrait
      */
     public function start($setting = [])
     {
-        foreach(get_class_methods($this) as $methodName)
-        {
-            $str = Str::snake($methodName);
-
-            if(Str::startsWith($str, 'boot_') && Str::endsWith($str, '_strap'))
-            {
-                $this->{$methodName}($setting);
-            }
-        }
-
-        $this->bootstrap($setting);
-
-        //
-
         foreach(\Flysion\Swoolaravel\events as $name => $class)
         {
             $beforeMethod = 'on' . ucfirst($name) . 'Before';
@@ -278,15 +212,27 @@ trait ServerTrait
 
             if(method_exists($this, $beforeMethod) || method_exists($this, $afterMethod))
             {
-                $this->on($name, null);
+                $this->enableEvent($name);
             }
         }
 
-        //
+        // bootstrap
+
+        if(method_exists($this, 'bootstrap')) {
+            $setting = $this->bootstrap($setting);
+        }
+
+        foreach(get_class_methods($this) as $method) {
+            if (substr($method, 0, 4) === 'boot' && substr($method, -5) === 'Strap') {
+                $setting = $this->{$method}($setting);
+            }
+        }
+
+        // setting
 
         $this->set(array_merge(
+            $setting,
             $this->setting ?? [],
-            $this->setting($setting),
             ['task_use_object' => false]
         ));
 

@@ -23,11 +23,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function register()
     {
-        $this->publishes([
-            __DIR__ . '/../config/swoolaravel.php' => $this->app->configPath('swoolaravel.php')
-        ], 'swoolaravel');
 
-        $this->mergeConfigFrom(__DIR__ . '/../config/swoolaravel.php', 'swoolaravel');
     }
 
     /**

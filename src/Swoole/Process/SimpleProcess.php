@@ -32,7 +32,7 @@ class SimpleProcess extends Process
     /**
      * @return void
      */
-    public function handle()
+    protected function handle()
     {
         call_user_func($this->handleFunc, $this);
     }

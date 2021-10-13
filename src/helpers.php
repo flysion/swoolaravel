@@ -72,41 +72,6 @@ function swoole_request_to_laravel_request(\Swoole\Http\Request $request) : \Ill
 }
 
 /**
- * 通过 class 注释中的"@property"解析属性列表，用于创建一个 \Swoole\Table
- *
- * @see \Swoole\Table
- * @param $class
- * @return array
- * @throws \ReflectionException
- */
-function parse_class_property_to_table_column($class)
-{
-    $fields = [];
-
-    $reflectionClass = new \ReflectionClass($class);
-    $comments = explode("\n", $reflectionClass->getDocComment());
-
-    foreach($comments as $line)
-    {
-        if(preg_match('/^\*\s*@property\s+(int|float|bool)\s+\$(\w+)/', trim($line), $result)) {
-            $name = $result[2];
-            $dataType = $result[1];
-            $length = null;
-        } elseif(preg_match('/^\*\s*@property\s+(string|array)\((\d+)\)\s+\$(\w+)/', trim($line), $result)) {
-            $name = $result[3];
-            $dataType = $result[1];
-            $length = intval($result[2]);
-        } else {
-            continue;
-        }
-
-        $fields[$name] = [$dataType, $length];
-    }
-
-    return $fields;
-}
-
-/**
  * 应用程序是否运行在 swoole 里
  *
  * @return bool

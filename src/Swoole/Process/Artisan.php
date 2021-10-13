@@ -44,11 +44,11 @@ class Artisan extends Process
     }
 
     /**
-     * 执行队列消费
+     * 执行命令行任务
      *
      * @return void
      */
-    public function handle()
+    protected function handle()
     {
         \Illuminate\Support\Facades\Artisan::call($this->command, $this->parameters, $this->outputBuffer);
     }

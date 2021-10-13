@@ -2,7 +2,7 @@
 
 namespace Flysion\Swoolaravel\Swoole;
 
-class HashStore
+class HashStore implements \ArrayAccess
 {
     /**
      * @var \Swoole\Table
@@ -19,7 +19,7 @@ class HashStore
      * @param null|float $conflictProportion
      * @throws
      */
-    public function __construct(array $columns, $conflictProportion = null)
+    public function __construct(array $columns, $conflictProportion = 0.2)
     {
         $this->data = new \Swoole\Table(1, $conflictProportion);
 
@@ -32,17 +32,29 @@ class HashStore
     }
 
     /**
-     * @param string|null
-     * @param null $conflict_proportion
-     * @return static
-     * @throws \ReflectionException
+     * @param array $data
+     * @param float $conflictProportion
+     * @return HashStore
      */
-    public static function createFromProperty($class = null, $conflict_proportion = null)
+    public static function createFromData(array $data, $conflictProportion = 0.2)
     {
-        return new static(
-            \Flysion\Swoolaravel\parse_class_property_to_table_column($class ?? static::class),
-            $conflict_proportion
-        );
+        $columns = [];
+        foreach($data as $key => $value)
+        {
+            $type = gettype($value);
+            $length = $type === 'string' ? strlen($value) * 4 : null;
+
+            $columns[$key] = [$type, $length];
+        }
+
+        $instance = new static($columns, $conflictProportion);
+
+        foreach($data as $key => $value)
+        {
+            $instance->set($key, $value);
+        }
+
+        return $instance;
     }
 
     /**
@@ -51,22 +63,21 @@ class HashStore
      * @param int|null $length
      * @throws
      */
-    protected function addColumn($name, $dataType, $length = null)
+    private function addColumn($name, $dataType, $length = null)
     {
         switch ($dataType) {
-            case 'bool':
-            case 'int':
+            case 'boolean':
+            case 'integer':
                 $this->data->column($name, \Swoole\Table::TYPE_INT);
                 break;
-            case 'float':
+            case 'double':
                 $this->data->column($name, \Swoole\Table::TYPE_FLOAT);
                 break;
-            case 'array':
             case 'string':
                 $this->data->column($name, \Swoole\Table::TYPE_STRING, $length);
                 break;
             default:
-                throw new \Exception("Not suppert data-type: {$dataType}");
+                throw new \Exception("Not support data-type: {$dataType}");
         }
 
         $this->columns[$name]['dataType'] = $dataType;
@@ -82,20 +93,18 @@ class HashStore
         $dataType = $this->columns[$key]['dataType'];
 
         switch ($dataType) {
-            case 'int':
-            case 'float':
+            case 'integer':
+            case 'double':
             case 'string':
                 return $value;
-            case 'bool':
-                return $value !== 0;
-            case 'array':
-                return unserialize($value);
+            case 'boolean':
+                return $value === 1;
         }
     }
 
     /**
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param mixed $value
      * @return mixed
      */
     protected function serialize($key, $value)
@@ -103,16 +112,14 @@ class HashStore
         $dataType = $this->columns[$key]['dataType'];
 
         switch ($dataType) {
-            case 'int':
+            case 'integer':
                 return intval($value);
-            case 'float':
-                return floatval($value);
+            case 'double':
+                return doubleval($value);
             case 'string':
                 return strval($value);
-            case 'bool':
+            case 'boolean':
                 return $value ? 1 : 0;
-            case 'array':
-                return serialize($value);
         }
     }
 
@@ -171,7 +178,7 @@ class HashStore
      * @return array
      * @throws
      */
-    public function all()
+    public function toArray()
     {
         $data = $this->data->get(0) ?: [];
 
@@ -201,5 +208,55 @@ class HashStore
     public function __set($name, $value)
     {
         $this->set($name, $value);
+    }
+
+    /**
+     * Whether a offset exists
+     *
+     * @link https://php.net/manual/en/arrayaccess.offsetexists.php
+     * @param mixed $offset
+     * @return boolean true on success or false on failure.
+     */
+    public function offsetExists($offset)
+    {
+        return $this->data->get(0, $offset) !== false;
+    }
+
+    /**
+     * Offset to retrieve
+     *
+     * @link https://php.net/manual/en/arrayaccess.offsetget.php
+     * @param mixed $offset
+     * @return mixed Can return all value types.
+     */
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
+    }
+
+    /**
+     * Offset to set
+     *
+     * @link https://php.net/manual/en/arrayaccess.offsetset.php
+     * @param mixed $offset
+     * @param mixed $value
+     * @return void
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->set($offset, $value);
+    }
+
+    /**
+     * Offset to unset
+     *
+     * @link https://php.net/manual/en/arrayaccess.offsetunset.php
+     * @param mixed $offset
+     * @return void
+     * @throws
+     */
+    public function offsetUnset($offset)
+    {
+        throw new \Exception("Dont unset \"{$offset}\"");
     }
 }

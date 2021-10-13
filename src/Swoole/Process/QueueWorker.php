@@ -48,7 +48,7 @@ class QueueWorker extends Process
      *
      * @return void
      */
-    public function handle()
+    protected function handle()
     {
         /**
          * @var \Illuminate\Queue\Worker $queue

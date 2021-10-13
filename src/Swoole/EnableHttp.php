@@ -11,14 +11,17 @@ trait EnableHttp
 {
     /**
      * @param array $setting
+     * @return array $setting
      */
-    protected function bootEnableHttpStrap(&$setting)
+    protected function bootEnableHttpStrap($setting)
     {
         $setting['open_http_protocol'] = true;
 
         $this->on('request', function($server, \Flysion\Swoolaravel\Events\Request $event) {
             return $this->requestToLaravel($server, $event);
         });
+
+        return $setting;
     }
 
     /**
