@@ -5,6 +5,7 @@ namespace Flysion\Swoolaravel;
 const events = [
     'start' => Events\Start::class,
     'shutdown' => Events\Shutdown::class,
+    'beforeShutdown' => Events\BeforeShutdown::class,
     'managerStart' => Events\ManagerStart::class,
     'managerStop' => Events\ManagerStop::class,
     'workerStart' => Events\WorkerStart::class,
