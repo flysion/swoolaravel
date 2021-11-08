@@ -18,18 +18,17 @@ trait EnableHttp
         $setting['open_http_protocol'] = true;
 
         $this->on('request', function($server, \Flysion\Swoolaravel\Events\Request $event) {
-            return $this->requestToLaravel($server, $event);
+            $this->requestToLaravel($event);
         });
 
         return $setting;
     }
 
     /**
-     * @param \Flysion\Swoolaravel\Swoole\Http\Server|\Flysion\Swoolaravel\Swoole\WebSocket\Server $server
      * @param \Flysion\Swoolaravel\Events\Request $event
      * @throws
      */
-    protected function requestToLaravel($server, \Flysion\Swoolaravel\Events\Request $event)
+    protected function requestToLaravel(\Flysion\Swoolaravel\Events\Request $event)
     {
         /**
          * @var \Illuminate\Foundation\Http\Kernel $kernel

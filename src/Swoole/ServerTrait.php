@@ -81,7 +81,7 @@ trait ServerTrait
     /**
      * @param string $name
      * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
-     * @return void|false
+     * @return false|mixed
      * @throws
      */
     final protected function onBefore($name, $event)
@@ -97,7 +97,7 @@ trait ServerTrait
     /**
      * @param string $name
      * @param \Flysion\Swoolaravel\Events\SwooleEvent $event
-     * @return void|false
+     * @return void
      * @throws
      */
     final protected function onAfter($name, $event)

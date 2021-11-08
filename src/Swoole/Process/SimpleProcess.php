@@ -8,17 +8,17 @@ namespace Flysion\Swoolaravel\Swoole\Process;
 class SimpleProcess extends Process
 {
     /**
-     * @var \Closure
+     * @var callable
      */
-    protected $handleFunc;
+    protected $callback;
 
     /**
-     * @param \Closure $handleFunc
+     * @param callable $callback
      * @param bool $redirect_stdin_and_stdout
      * @param int $pipe_type
      * @param bool $enable_coroutine
      */
-    public function __construct($handleFunc, $redirect_stdin_and_stdout = false, $pipe_type = SOCK_DGRAM, $enable_coroutine = false)
+    public function __construct($callback, $redirect_stdin_and_stdout = false, $pipe_type = SOCK_DGRAM, $enable_coroutine = false)
     {
         parent::__construct(
             $redirect_stdin_and_stdout,
@@ -26,7 +26,7 @@ class SimpleProcess extends Process
             $enable_coroutine
         );
 
-        $this->handleFunc = $handleFunc;
+        $this->callback = $callback;
     }
 
     /**
@@ -34,6 +34,6 @@ class SimpleProcess extends Process
      */
     protected function handle()
     {
-        call_user_func($this->handleFunc, $this);
+        call_user_func($this->callback, $this);
     }
 }
